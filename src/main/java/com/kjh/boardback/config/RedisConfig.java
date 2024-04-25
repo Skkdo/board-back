@@ -15,9 +15,9 @@ public class RedisConfig {
 
     // redis 연결, redis 의 pub/sub 기능을 이용하기 위해 pub/sub 메시지를 처리하는 MessageListener 설정(등록)
     @Bean
-    public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory) {		// 1.
+    public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);		// 2.
+        container.setConnectionFactory(connectionFactory);
 
         return container;
     }
@@ -27,8 +27,8 @@ public class RedisConfig {
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());        // Key Serializer
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));      // Value Serializer
+        redisTemplate.setKeySerializer(new StringRedisSerializer());                                                    // Key Serializer
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));                              // Value Serializer
 
         return redisTemplate;
     }
@@ -38,8 +38,8 @@ public class RedisConfig {
     public RedisTemplate<String, Message> redisTemplateMessage(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Message> redisTemplateMessage = new RedisTemplate<>();
         redisTemplateMessage.setConnectionFactory(connectionFactory);
-        redisTemplateMessage.setKeySerializer(new StringRedisSerializer());        // Key Serializer
-        redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));      // Value Serializer
+        redisTemplateMessage.setKeySerializer(new StringRedisSerializer());                                             // Key Serializer
+        redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));                       // Value Serializer
 
         return redisTemplateMessage;
     }

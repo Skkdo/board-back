@@ -14,12 +14,12 @@ import java.util.List;
 @Getter
 public class GetUserBoardListResponseDto extends ResponseDto {
 
-    private List<BoardListItem> boardListItems;
+    private List<BoardListItem> userBoardList;
 
     private GetUserBoardListResponseDto(List<BoardListViewEntity> boardListViewEntities) {
         super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         List<BoardListItem> boardListItems = BoardListItem.getList(boardListViewEntities);
-        this.boardListItems = boardListItems;
+        this.userBoardList = boardListItems;
     }
 
     public static ResponseEntity<GetUserBoardListResponseDto> success(List<BoardListViewEntity> boardListViewEntities){

@@ -10,21 +10,21 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @RequiredArgsConstructor
 @Configuration
-@EnableWebSocket                    // webSocket 활성화
-@EnableWebSocketMessageBroker       // stomp 활성화
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {		// WebSocketMessageBrokerConfigurer 인터페이스를 구현
+@EnableWebSocket                                                                                  // webSocket 활성화
+@EnableWebSocketMessageBroker                                                                     // stomp 활성화
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {		                  // WebSocketMessageBrokerConfigurer 인터페이스를 구현
 
-    // 1. Stomp websocket 연결
+
     @Override
-    public void  registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-stomp")             /// ws://example.com/ws-stomp
+    public void  registerStompEndpoints(StompEndpointRegistry registry) {                         // Stomp websocket 연결
+        registry.addEndpoint("/ws-stomp")                                                  // ws://example.com/ws-stomp
                 .setAllowedOriginPatterns("*");
     }
 
-    // Stomp 사용을 위한 Message Broker 설정
+
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/sub");				// 2.
-        registry.setApplicationDestinationPrefixes("pub");	// 3.
+    public void configureMessageBroker(MessageBrokerRegistry registry) {                          // Stomp 사용을 위한 Message Broker 설정
+        registry.enableSimpleBroker("/sub");
+        registry.setApplicationDestinationPrefixes("pub");
     }
 }

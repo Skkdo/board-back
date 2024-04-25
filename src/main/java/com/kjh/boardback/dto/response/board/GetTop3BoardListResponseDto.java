@@ -14,10 +14,10 @@ import java.util.List;
 @Getter
 public class GetTop3BoardListResponseDto extends ResponseDto {
 
-    private List<BoardListItem> top3BoardList;
+    private List<BoardListItem> top3List;
     private GetTop3BoardListResponseDto(List<BoardListViewEntity> boardListViewEntities) {
         super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-        this.top3BoardList = BoardListItem.getList(boardListViewEntities);
+        this.top3List = BoardListItem.getList(boardListViewEntities);
 
     }
 
