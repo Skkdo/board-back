@@ -1,4 +1,4 @@
-package com.kjh.boardback.repository;
+package com.kjh.boardback.repository.board;
 
 import com.kjh.boardback.entity.BoardListViewEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

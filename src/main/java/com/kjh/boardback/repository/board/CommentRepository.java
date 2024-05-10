@@ -1,4 +1,4 @@
-package com.kjh.boardback.repository;
+package com.kjh.boardback.repository.board;
 
 import com.kjh.boardback.dto.object.CommentListItem;
 import com.kjh.boardback.repository.resultSet.GetCommentListResultSet;
