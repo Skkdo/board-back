@@ -1,6 +1,6 @@
 package com.kjh.boardback.config;
 
-import com.kjh.boardback.dto.object.Message;
+import com.kjh.boardback.dto.object.ChatMessage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -35,8 +35,8 @@ public class RedisConfig {
 
     // Redis 에 메시지 내역을 저장하기 위한 RedisTemplate 을 설정
     @Bean
-    public RedisTemplate<String, Message> redisTemplateMessage(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Message> redisTemplateMessage = new RedisTemplate<>();
+    public RedisTemplate<String, ChatMessage> redisTemplateMessage(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatMessage> redisTemplateMessage = new RedisTemplate<>();
         redisTemplateMessage.setConnectionFactory(connectionFactory);
         redisTemplateMessage.setKeySerializer(new StringRedisSerializer());                                             // Key Serializer
         redisTemplateMessage.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));                       // Value Serializer
