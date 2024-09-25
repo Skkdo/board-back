@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountLogItem {
+    private int accountLogNumber;
     private int type;
     private String customTypeName;
     private String content;
@@ -31,6 +32,7 @@ public class AccountLogItem {
             return accountLogItemList;
     }
     public AccountLogItem(AccountLogEntity accountLogEntity,String customTypeName){
+        this.accountLogNumber = accountLogEntity.getAccountLogNumber();
         this.type = accountLogEntity.getType();
         this.customTypeName = customTypeName;
         this.content = accountLogEntity.getContent();
