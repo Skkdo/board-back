@@ -1,4 +1,4 @@
-package com.kjh.boardback.grobal.config;
+package com.kjh.boardback.global.config;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.kjh.boardback.grobal.filter.JwtAuthenticationFilter;
+import com.kjh.boardback.global.filter.JwtAuthenticationFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

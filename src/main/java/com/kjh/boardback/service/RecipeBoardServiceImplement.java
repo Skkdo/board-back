@@ -1,4 +1,4 @@
-package com.kjh.boardback.service.implement;
+package com.kjh.boardback.service;
 
 
 import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
@@ -6,24 +6,49 @@ import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
 import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.*;
+import com.kjh.boardback.dto.response.recipe_board.DeleteRecipeBoardResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.DeleteRecipeCommentResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetLatestRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetRecipeCommentListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetRecipeFavoriteListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetSearchRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetTop3ConvenienceRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetTop3GeneralRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetTop3RecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetUserRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.IncreaseRecipeViewCountResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.PatchRecipeBoardResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.PatchRecipeCommentResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.PostRecipeBoardResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.PostRecipeCommentResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.PutRecipeFavoriteResponseDto;
 import com.kjh.boardback.entity.SearchLogEntity;
-import com.kjh.boardback.entity.recipe_board.*;
+import com.kjh.boardback.entity.recipe_board.RecipeBoardEntity;
+import com.kjh.boardback.entity.recipe_board.RecipeBoardListViewEntity;
+import com.kjh.boardback.entity.recipe_board.RecipeCommentEntity;
+import com.kjh.boardback.entity.recipe_board.RecipeFavoriteEntity;
+import com.kjh.boardback.entity.recipe_board.RecipeImageEntity;
 import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.UserRepository;
-import com.kjh.boardback.repository.recipe_board.*;
-import com.kjh.boardback.repository.resultSet.*;
+import com.kjh.boardback.repository.recipe_board.RecipeBoardListViewRepository;
+import com.kjh.boardback.repository.recipe_board.RecipeBoardRepository;
+import com.kjh.boardback.repository.recipe_board.RecipeCommentRepository;
+import com.kjh.boardback.repository.recipe_board.RecipeFavoriteRepository;
+import com.kjh.boardback.repository.recipe_board.RecipeImageRepository;
+import com.kjh.boardback.repository.resultSet.GetRecipeBoardResultSet;
+import com.kjh.boardback.repository.resultSet.GetRecipeCommentListResultSet;
+import com.kjh.boardback.repository.resultSet.GetRecipeFavoriteListResultSet;
 import com.kjh.boardback.service.RecipeBoardService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

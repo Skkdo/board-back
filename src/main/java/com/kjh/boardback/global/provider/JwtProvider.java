@@ -1,4 +1,4 @@
-package com.kjh.boardback.grobal.provider;
+package com.kjh.boardback.global.provider;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

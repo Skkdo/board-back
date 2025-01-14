@@ -1,7 +1,8 @@
-package com.kjh.boardback.grobal.exception;
+package com.kjh.boardback.global.exception;
 
-import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.grobal.common.ResponseCode;
+
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -11,20 +12,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class BadRequestExceptionHandler {
+public class GlobalExceptionHandler {
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class,
+            HttpMessageNotReadableException.class})
     public ResponseEntity<ResponseDto> validationExceptionHandler(Exception e) {
         log.warn(e.getMessage(), e);
         ResponseDto responseDto = new ResponseDto(ResponseCode.VALIDATION_FAILED);
-        return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
+        return ResponseEntity.status(ResponseCode.VALIDATION_FAILED.getStatus()).body(responseDto);
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ResponseDto> BusinessExceptionHandler(BusinessException e) {
         log.warn(e.getMessage(), e);
-        ResponseDto responseDto = new ResponseDto(e.getResponseCode());
-        return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
+        ResponseCode responseCode = e.getResponseCode();
+        ResponseDto responseDto = new ResponseDto(responseCode);
+        return ResponseEntity.status(responseCode.getStatus()).body(responseDto);
     }
 
 }

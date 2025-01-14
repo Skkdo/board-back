@@ -4,15 +4,13 @@ import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
-import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.*;
-import com.kjh.boardback.service.RecipeBoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-// test commit
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/recipe/recipe-board")

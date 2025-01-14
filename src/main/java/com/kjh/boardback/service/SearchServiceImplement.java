@@ -1,4 +1,4 @@
-package com.kjh.boardback.service.implement;
+package com.kjh.boardback.service;
 
 import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.dto.response.search.GetPopularListResponseDto;
@@ -7,12 +7,11 @@ import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.resultSet.GetPopularListResultSet;
 import com.kjh.boardback.repository.resultSet.GetRelationListResultSet;
 import com.kjh.boardback.service.SearchService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

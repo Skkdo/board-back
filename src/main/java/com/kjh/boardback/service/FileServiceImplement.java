@@ -1,14 +1,13 @@
-package com.kjh.boardback.service.implement;
-import org.springframework.stereotype.Service;
-import com.kjh.boardback.service.FileService;
-import org.springframework.web.multipart.MultipartFile;
+package com.kjh.boardback.service;
 
+import com.kjh.boardback.service.FileService;
 import java.io.File;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 

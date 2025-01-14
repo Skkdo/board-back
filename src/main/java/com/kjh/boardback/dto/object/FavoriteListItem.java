@@ -1,12 +1,10 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.repository.resultSet.GetFavoriteListResultSet;
+import com.kjh.boardback.entity.board.Favorite;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -17,18 +15,17 @@ public class FavoriteListItem {
     private String nickname;
     private String profileImage;
 
-    public FavoriteListItem(GetFavoriteListResultSet resultSet) {
-        this.email = resultSet.getEmail();
-        this.nickname = resultSet.getNickname();
-        this.profileImage = resultSet.getProfileImage();
+    public FavoriteListItem(Favorite favorite) {
+        this.email = favorite.getUser().getEmail();
+        this.nickname = favorite.getUser().getNickname();
+        this.profileImage = favorite.getUser().getProfileImage();
     }
 
-    public static List<FavoriteListItem> copyList(List<GetFavoriteListResultSet> resultSets){
-        List<FavoriteListItem> list = new ArrayList<>();
-        for(GetFavoriteListResultSet resultSet : resultSets){
-            FavoriteListItem favoriteListItem = new FavoriteListItem(resultSet);
-            list.add(favoriteListItem);
-        }
-        return list;
+    public static List<FavoriteListItem> getList(List<Favorite> favoriteList) {
+        return favoriteList.stream()
+                .map(favorite -> {
+                    return new FavoriteListItem(favorite);
+                })
+                .toList();
     }
 }

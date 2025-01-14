@@ -1,34 +1,20 @@
 package com.kjh.boardback.dto.response.board;
 
-import com.kjh.boardback.grobal.common.ResponseCode;
-import com.kjh.boardback.grobal.common.ResponseMessage;
 import com.kjh.boardback.dto.object.BoardListItem;
-import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.entity.board.BoardListViewEntity;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
+import com.kjh.boardback.entity.User;
+import com.kjh.boardback.entity.board.Board;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import java.util.List;
+import lombok.Getter;
 
 @Getter
 public class GetUserBoardListResponseDto extends ResponseDto {
 
     private List<BoardListItem> userBoardList;
 
-    private GetUserBoardListResponseDto(List<BoardListViewEntity> boardListViewEntities) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-        List<BoardListItem> boardListItems = BoardListItem.getList(boardListViewEntities);
-        this.userBoardList = boardListItems;
-    }
-
-    public static ResponseEntity<GetUserBoardListResponseDto> success(List<BoardListViewEntity> boardListViewEntities){
-        GetUserBoardListResponseDto result = new GetUserBoardListResponseDto(boardListViewEntities);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
-
-    public static ResponseEntity<ResponseDto> noExistUser(){
-        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXISTED_USER, ResponseMessage.NOT_EXISTED_USER);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+    public GetUserBoardListResponseDto(List<Board> boardList, User user) {
+        super(ResponseCode.SUCCESS);
+        this.userBoardList = BoardListItem.getList(boardList, user);
     }
 }

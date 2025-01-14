@@ -24,7 +24,7 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sequence")
-    private long sequence;
+    private int sequence;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_number" , nullable = false)
@@ -32,4 +32,9 @@ public class Image {
 
     @Column(name = "image" , nullable = false)
     private String image;
+
+    public Image(Board board,String image) {
+        this.board = board;
+        this.image =image;
+    }
 }

@@ -37,7 +37,7 @@ public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_number")
-    private long commentNumber;
+    private int commentNumber;
 
     @Column(name = "content" , nullable = false)
     private String content;
@@ -52,5 +52,11 @@ public class Comment extends BaseEntity {
 
     public void patchComment(PatchCommentRequestDto dto){
         this.content = dto.getContent();
+    }
+
+    public Comment(Board board, User user, PostCommentRequestDto dto){
+        this.content = dto.getContent();
+        this.writer = user;
+        this.board = board;
     }
 }

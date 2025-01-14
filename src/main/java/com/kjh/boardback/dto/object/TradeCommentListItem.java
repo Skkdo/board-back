@@ -1,13 +1,11 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.repository.resultSet.GetCommentListResultSet;
 import com.kjh.boardback.repository.resultSet.GetTradeCommentListResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -20,7 +18,7 @@ public class TradeCommentListItem {
     private String writeDatetime;
     private String content;
 
-    private TradeCommentListItem(GetTradeCommentListResultSet resultSet){
+    private TradeCommentListItem(GetTradeCommentListResultSet resultSet) {
         this.commentNumber = resultSet.getCommentNumber();
         this.nickname = resultSet.getNickname();
         this.profileImage = resultSet.getProfileImage();

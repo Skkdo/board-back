@@ -29,4 +29,9 @@ public class Favorite {
     @MapsId("boardNumber")
     @JoinColumn(name = "board_number", nullable = false)
     private Board board;
+
+    public Favorite(Board board, User user){
+        this.user = user;
+        this.board =board;
+    }
 }

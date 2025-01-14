@@ -1,7 +1,7 @@
 package com.kjh.boardback.dto.response.account_log;
 
-import com.kjh.boardback.grobal.common.ResponseCode;
-import com.kjh.boardback.grobal.common.ResponseMessage;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseMessage;
 import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.entity.account_log.MoneyCustomTypeEntity;
 import lombok.Getter;

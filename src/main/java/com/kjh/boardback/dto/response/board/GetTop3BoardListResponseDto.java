@@ -1,28 +1,20 @@
 package com.kjh.boardback.dto.response.board;
 
-import com.kjh.boardback.grobal.common.ResponseCode;
-import com.kjh.boardback.grobal.common.ResponseMessage;
 import com.kjh.boardback.dto.object.BoardListItem;
-import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.entity.board.BoardListViewEntity;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
+import com.kjh.boardback.entity.board.Board;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import java.util.List;
+import lombok.Getter;
 
 @Getter
 public class GetTop3BoardListResponseDto extends ResponseDto {
 
     private List<BoardListItem> top3List;
-    private GetTop3BoardListResponseDto(List<BoardListViewEntity> boardListViewEntities) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-        this.top3List = BoardListItem.getList(boardListViewEntities);
 
-    }
+    public GetTop3BoardListResponseDto(List<Board> boardList) {
+        super(ResponseCode.SUCCESS);
+        this.top3List = BoardListItem.getList(boardList);
 
-    public static ResponseEntity<GetTop3BoardListResponseDto> success(List<BoardListViewEntity> boardListViewEntities){
-        GetTop3BoardListResponseDto result = new GetTop3BoardListResponseDto(boardListViewEntities);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

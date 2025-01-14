@@ -1,13 +1,11 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.repository.resultSet.GetFavoriteListResultSet;
 import com.kjh.boardback.repository.resultSet.GetRecipeFavoriteListResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -24,9 +22,9 @@ public class RecipeFavoriteListItem {
         this.profileImage = resultSet.getProfileImage();
     }
 
-    public static List<RecipeFavoriteListItem> copyList(List<GetRecipeFavoriteListResultSet> resultSets){
+    public static List<RecipeFavoriteListItem> copyList(List<GetRecipeFavoriteListResultSet> resultSets) {
         List<RecipeFavoriteListItem> list = new ArrayList<>();
-        for(GetRecipeFavoriteListResultSet resultSet : resultSets){
+        for (GetRecipeFavoriteListResultSet resultSet : resultSets) {
             RecipeFavoriteListItem favoriteListItem = new RecipeFavoriteListItem(resultSet);
             list.add(favoriteListItem);
         }

@@ -1,47 +1,71 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.entity.board.BoardListViewEntity;
+import com.kjh.boardback.entity.User;
+import com.kjh.boardback.entity.board.Board;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class BoardListItem {
-   private int boardNumber;
-   private String title;
-   private String content;
-   private String boardTitleImage;
-   private int favoriteCount;
-   private int commentCount;
-   private int viewCount;
-   private String writeDatetime;
-   private String writerNickname;
-   private String writerProfileImage;
+    private int boardNumber;
+    private String title;
+    private String content;
+    private String boardTitleImage;
+    private int favoriteCount;
+    private int commentCount;
+    private int viewCount;
+    private String writeDatetime;
+    private String writerNickname;
+    private String writerProfileImage;
 
-   public BoardListItem(BoardListViewEntity boardListViewEntity){
-      this.boardNumber = boardListViewEntity.getBoardNumber();
-      this.title = boardListViewEntity.getTitle();
-      this.content = boardListViewEntity.getContent();
-      this.boardTitleImage = boardListViewEntity.getTitleImage();
-      this.viewCount = boardListViewEntity.getViewCount();
-      this.favoriteCount = boardListViewEntity.getFavoriteCount();
-      this.commentCount = boardListViewEntity.getCommentCount();
-      this.writeDatetime = boardListViewEntity.getWriteDatetime();
-      this.writerNickname = boardListViewEntity.getWriterNickname();
-      this.writerProfileImage = boardListViewEntity.getWriterProfileImage();
-   }
+    public BoardListItem(Board board, User user) {
+        BoardListItem.builder()
+                .boardNumber(board.getBoardNumber())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .boardTitleImage(board.getTitleImage())
+                .favoriteCount(board.getFavoriteCount())
+                .commentCount(board.getCommentCount())
+                .viewCount(board.getViewCount())
+                .writeDatetime(board.getCreatedAt().toString())
+                .writerNickname(user.getNickname())
+                .writerProfileImage(user.getProfileImage());
+    }
 
-   public static List<BoardListItem> getList(List<BoardListViewEntity> boardListViewEntities){
-      List<BoardListItem> list = new ArrayList<>();
-      for(BoardListViewEntity boardListViewEntity : boardListViewEntities){
-         BoardListItem boardListItem = new BoardListItem(boardListViewEntity);
-         list.add(boardListItem);
-      }
-      return list;
-   }
+    public BoardListItem(Board board) {
+        BoardListItem.builder()
+                .boardNumber(board.getBoardNumber())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .boardTitleImage(board.getTitleImage())
+                .favoriteCount(board.getFavoriteCount())
+                .commentCount(board.getCommentCount())
+                .viewCount(board.getViewCount())
+                .writeDatetime(board.getCreatedAt().toString())
+                .writerNickname(board.getWriter().getNickname())
+                .writerProfileImage(board.getWriter().getProfileImage());
+    }
+
+    public static List<BoardListItem> getList(List<Board> boardList, User user) {
+        return boardList.stream()
+                .map(board -> {
+                    return new BoardListItem(board, user);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public static List<BoardListItem> getList(List<Board> boardList) {
+        return boardList.stream()
+                .map(board -> {
+                    return new BoardListItem(board);
+                })
+                .collect(Collectors.toList());
+    }
 }

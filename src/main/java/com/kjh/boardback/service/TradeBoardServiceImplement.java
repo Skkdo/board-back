@@ -1,30 +1,51 @@
-package com.kjh.boardback.service.implement;
+package com.kjh.boardback.service;
 
 import com.kjh.boardback.dto.request.trade_board.PatchTradeBoardRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PatchTradeCommentRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PostTradeBoardRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PostTradeCommentRequestDto;
 import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.dto.response.trade_board.*;
+import com.kjh.boardback.dto.response.trade_board.DeleteTradeBoardResponseDto;
+import com.kjh.boardback.dto.response.trade_board.DeleteTradeCommentResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetLatestTradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetSearchTradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTop3TradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeBoardResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeCommentListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeFavoriteListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetUserTradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.IncreaseTradeViewCountResponseDto;
+import com.kjh.boardback.dto.response.trade_board.PatchTradeBoardResponseDto;
+import com.kjh.boardback.dto.response.trade_board.PatchTradeCommentResponseDto;
+import com.kjh.boardback.dto.response.trade_board.PostTradeBoardResponseDto;
+import com.kjh.boardback.dto.response.trade_board.PostTradeCommentResponseDto;
+import com.kjh.boardback.dto.response.trade_board.PutTradeFavoriteResponseDto;
 import com.kjh.boardback.entity.SearchLogEntity;
-import com.kjh.boardback.entity.trade_board.*;
+import com.kjh.boardback.entity.trade_board.TradeBoardEntity;
+import com.kjh.boardback.entity.trade_board.TradeBoardListViewEntity;
+import com.kjh.boardback.entity.trade_board.TradeCommentEntity;
+import com.kjh.boardback.entity.trade_board.TradeFavoriteEntity;
+import com.kjh.boardback.entity.trade_board.TradeImageEntity;
 import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.UserRepository;
 import com.kjh.boardback.repository.resultSet.GetTradeBoardResultSet;
 import com.kjh.boardback.repository.resultSet.GetTradeCommentListResultSet;
 import com.kjh.boardback.repository.resultSet.GetTradeFavoriteListResultSet;
-import com.kjh.boardback.repository.trade_board.*;
+import com.kjh.boardback.repository.trade_board.TradeBoardListViewRepository;
+import com.kjh.boardback.repository.trade_board.TradeBoardRepository;
+import com.kjh.boardback.repository.trade_board.TradeCommentRepository;
+import com.kjh.boardback.repository.trade_board.TradeFavoriteRepository;
+import com.kjh.boardback.repository.trade_board.TradeImageRepository;
 import com.kjh.boardback.service.TradeBoardService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

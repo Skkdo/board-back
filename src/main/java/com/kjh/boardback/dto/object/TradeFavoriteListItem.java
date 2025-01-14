@@ -1,13 +1,11 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.repository.resultSet.GetFavoriteListResultSet;
 import com.kjh.boardback.repository.resultSet.GetTradeFavoriteListResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -24,9 +22,9 @@ public class TradeFavoriteListItem {
         this.profileImage = resultSet.getProfileImage();
     }
 
-    public static List<TradeFavoriteListItem> copyList(List<GetTradeFavoriteListResultSet> resultSets){
+    public static List<TradeFavoriteListItem> copyList(List<GetTradeFavoriteListResultSet> resultSets) {
         List<TradeFavoriteListItem> list = new ArrayList<>();
-        for(GetTradeFavoriteListResultSet resultSet : resultSets){
+        for (GetTradeFavoriteListResultSet resultSet : resultSets) {
             TradeFavoriteListItem favoriteListItem = new TradeFavoriteListItem(resultSet);
             list.add(favoriteListItem);
         }

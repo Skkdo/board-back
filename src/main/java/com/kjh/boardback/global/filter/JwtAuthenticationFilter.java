@@ -1,6 +1,6 @@
-package com.kjh.boardback.grobal.filter;
+package com.kjh.boardback.global.filter;
 import org.springframework.stereotype.Component;
-import com.kjh.boardback.grobal.provider.JwtProvider;
+import com.kjh.boardback.global.provider.JwtProvider;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,6 +1,6 @@
-package com.kjh.boardback.grobal.exception;
+package com.kjh.boardback.global.exception;
 
-import com.kjh.boardback.grobal.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseCode;
 import lombok.Getter;
 
 @Getter

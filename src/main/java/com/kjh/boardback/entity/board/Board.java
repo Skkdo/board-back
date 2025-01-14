@@ -32,13 +32,16 @@ public class Board extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "board_number")
-    private long boardNumber;
+    private int boardNumber;
 
     @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "content", nullable = false)
     private String content;
+
+    @Column(name = "title_image" , nullable = true)
+    private String titleImage;
 
     @Column(name = "favorite_count", nullable = false)
     private int favoriteCount;
@@ -76,5 +79,21 @@ public class Board extends BaseEntity {
     public void patchBoard(PatchBoardRequestDto dto) {
         this.title = dto.getTitle();
         this.content = dto.getContent();
+    }
+
+    public Board(PostBoardRequestDto dto, User user) {
+        String titleImage = null;
+        if(!dto.getBoardImageList().isEmpty()){
+            titleImage = dto.getBoardImageList().get(0);
+        }
+
+        Board.builder()
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .titleImage(titleImage)
+                .favoriteCount(0)
+                .commentCount(0)
+                .viewCount(0)
+                .writer(user);
     }
 }

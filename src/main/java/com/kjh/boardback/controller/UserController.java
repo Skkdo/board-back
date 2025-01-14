@@ -2,18 +2,21 @@ package com.kjh.boardback.controller;
 
 import com.kjh.boardback.dto.request.user.PatchNicknameRequestDto;
 import com.kjh.boardback.dto.request.user.PatchProfileImageRequestDto;
+import com.kjh.boardback.dto.response.user.GetSignInUserResponseDto;
 import com.kjh.boardback.dto.response.user.GetUserResponseDto;
-import com.kjh.boardback.dto.response.user.PatchNicknameResponseDto;
-import com.kjh.boardback.dto.response.user.PatchProfileImageResponseDto;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
+import com.kjh.boardback.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import com.kjh.boardback.dto.response.user.GetSignInUserResponseDto;
-import com.kjh.boardback.service.UserService;
-
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,37 +26,37 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("")
-    public ResponseEntity<? super GetSignInUserResponseDto> getSignInUser(
+    public ResponseEntity<GetSignInUserResponseDto> getSignInUser(
             @AuthenticationPrincipal String email
     ) {
-        ResponseEntity<? super GetSignInUserResponseDto> response = userService.getSignInUser(email);
-        return response;
+        GetSignInUserResponseDto response = userService.getSignInUser(email);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<?super GetUserResponseDto> getUser(
+    public ResponseEntity<GetUserResponseDto> getUser(
             @PathVariable("email") String email
-    ){
-        ResponseEntity<? super GetUserResponseDto> response = userService.getUser(email);
-        return response;
+    ) {
+        GetUserResponseDto response = userService.getUser(email);
+        return ResponseEntity.ok().body(response);
     }
 
     @PatchMapping("/nickname")
-    public ResponseEntity<? super PatchNicknameResponseDto> patchNickname(
+    public ResponseEntity<ResponseDto> patchNickname(
             @RequestBody @Valid PatchNicknameRequestDto requestBody,
             @AuthenticationPrincipal String email
-    ){
-        ResponseEntity<? super PatchNicknameResponseDto> response = userService.patchNickname(email, requestBody);
-        return response;
+    ) {
+        userService.patchNickname(email, requestBody);
+        return ResponseEntity.ok(new ResponseDto(ResponseCode.SUCCESS));
     }
 
     @PatchMapping("/profile-image")
-    public ResponseEntity<? super PatchProfileImageResponseDto> patchProfileImage(
+    public ResponseEntity<ResponseDto> patchProfileImage(
             @RequestBody @Valid PatchProfileImageRequestDto requestBody,
             @AuthenticationPrincipal String email
-    ){
-        ResponseEntity<? super PatchProfileImageResponseDto> response = userService.patchProfileImage(email, requestBody);
-        return response;
+    ) {
+        userService.patchProfileImage(email, requestBody);
+        return ResponseEntity.ok(new ResponseDto(ResponseCode.SUCCESS));
     }
 
 }
