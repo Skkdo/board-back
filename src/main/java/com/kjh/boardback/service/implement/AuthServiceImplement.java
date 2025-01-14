@@ -10,7 +10,7 @@ import com.kjh.boardback.dto.request.auth.SignUpRequestDto;
 import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.dto.response.auth.SignInResponseDto;
 import com.kjh.boardback.dto.response.auth.SignUpResponseDto;
-import com.kjh.boardback.entity.UserEntity;
+import com.kjh.boardback.entity.User;
 import com.kjh.boardback.provider.JwtProvider;
 import com.kjh.boardback.repository.UserRepository;
 import com.kjh.boardback.service.AuthService;
@@ -45,8 +45,8 @@ public class AuthServiceImplement implements AuthService {
             String encodedPassword = passwordEncoder.encode(password);
             dto.setPassword(encodedPassword);
 
-            UserEntity userEntity = new UserEntity(dto);
-            userRepository.save(userEntity);
+            User user = new User(dto);
+            userRepository.save(user);
 
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -65,11 +65,11 @@ public class AuthServiceImplement implements AuthService {
         try {
 
              String email = dto.getEmail();
-             UserEntity userEntity = userRepository.findByEmail(email);
-             if (userEntity == null) return SignInResponseDto.signInFail();
+             User user = userRepository.findByEmail(email);
+             if (user == null) return SignInResponseDto.signInFail();
 
              String password = dto.getPassword();
-             String encodedPassword = userEntity.getPassword();
+             String encodedPassword = user.getPassword();
 
              boolean isMatched = passwordEncoder.matches(password, encodedPassword);
              if(!isMatched) return SignInResponseDto.signInFail();

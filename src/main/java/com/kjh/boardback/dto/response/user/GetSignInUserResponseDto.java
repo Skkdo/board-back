@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import com.kjh.boardback.common.ResponseCode;
 import com.kjh.boardback.common.ResponseMessage;
 import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.entity.UserEntity;
+import com.kjh.boardback.entity.User;
 
 import lombok.Getter;
 
@@ -17,16 +17,16 @@ public class GetSignInUserResponseDto extends ResponseDto {
     private String nickname;
     private String profileImage;
 
-    private GetSignInUserResponseDto(UserEntity userEntity){
+    private GetSignInUserResponseDto(User user){
         super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-        this.email = userEntity.getEmail();
-        this.nickname = userEntity.getNickname();
-        this.profileImage = userEntity.getProfileImage();
+        this.email = user.getEmail();
+        this.nickname = user.getNickname();
+        this.profileImage = user.getProfileImage();
         
     }
 
-    public static ResponseEntity<GetSignInUserResponseDto> success(UserEntity userEntity){
-        GetSignInUserResponseDto result = new GetSignInUserResponseDto(userEntity);
+    public static ResponseEntity<GetSignInUserResponseDto> success(User user){
+        GetSignInUserResponseDto result = new GetSignInUserResponseDto(user);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

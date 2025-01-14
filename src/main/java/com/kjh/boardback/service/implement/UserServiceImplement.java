@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.dto.response.user.GetSignInUserResponseDto;
-import com.kjh.boardback.entity.UserEntity;
+import com.kjh.boardback.entity.User;
 import com.kjh.boardback.repository.UserRepository;
 import com.kjh.boardback.service.UserService;
 
@@ -25,54 +25,54 @@ public class UserServiceImplement implements UserService {
     @Override
     public ResponseEntity<? super GetUserResponseDto> getUser(String email) {
 
-        UserEntity userEntity = null;
+        User user = null;
 
         try{
 
-            userEntity = userRepository.findByEmail(email);
-            if(userEntity == null) return GetUserResponseDto.noExistUser();
+            user = userRepository.findByEmail(email);
+            if(user == null) return GetUserResponseDto.noExistUser();
 
 
         }catch (Exception exception){
             exception.printStackTrace();
             return ResponseDto.databaseError();
         }
-        return GetUserResponseDto.success(userEntity);
+        return GetUserResponseDto.success(user);
     }
 
     @Override
     public ResponseEntity<? super GetSignInUserResponseDto> getSignInUser(String email) {
 
-        UserEntity userEntity = null;
+        User user = null;
 
         try {
 
-            userEntity = userRepository.findByEmail(email);
-            if(userEntity == null) return GetSignInUserResponseDto.noExistUser();
+            user = userRepository.findByEmail(email);
+            if(user == null) return GetSignInUserResponseDto.noExistUser();
 
         } catch (Exception exception) {
             exception.printStackTrace();
             return ResponseDto.databaseError();
         }
 
-        return GetSignInUserResponseDto.success(userEntity);
+        return GetSignInUserResponseDto.success(user);
 
     }
 
     @Override
     public ResponseEntity<? super PatchNicknameResponseDto> patchNickname(String email,PatchNicknameRequestDto dto) {
 
-        UserEntity userEntity = null;
+        User user = null;
 
         try{
-            userEntity = userRepository.findByEmail(email);
-            if(userEntity == null) return PatchNicknameResponseDto.noExistUser();
+            user = userRepository.findByEmail(email);
+            if(user == null) return PatchNicknameResponseDto.noExistUser();
 
             boolean existedNickname = userRepository.existsByNickname(dto.getNickname());
             if(existedNickname) return PatchNicknameResponseDto.duplicateNickname();
 
-            userEntity.setNickname(dto.getNickname());
-            userRepository.save(userEntity);
+            user.setNickname(dto.getNickname());
+            userRepository.save(user);
 
 
         }catch (Exception exception){
@@ -85,14 +85,14 @@ public class UserServiceImplement implements UserService {
     @Override
     public ResponseEntity<? super PatchProfileImageResponseDto> patchProfileImage(String email, PatchProfileImageRequestDto dto) {
 
-        UserEntity userEntity = null;
+        User user = null;
 
         try{
-            userEntity = userRepository.findByEmail(email);
-            if(userEntity == null) return PatchProfileImageResponseDto.noExistUser();
+            user = userRepository.findByEmail(email);
+            if(user == null) return PatchProfileImageResponseDto.noExistUser();
 
-            userEntity.setProfileImage(dto.getProfileImage());
-            userRepository.save(userEntity);
+            user.setProfileImage(dto.getProfileImage());
+            userRepository.save(user);
 
         }catch (Exception exception){
             exception.printStackTrace();
