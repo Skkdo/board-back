@@ -3,7 +3,7 @@ package com.kjh.boardback.dto.response.board;
 import com.kjh.boardback.common.ResponseCode;
 import com.kjh.boardback.common.ResponseMessage;
 import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.entity.board.ImageEntity;
+import com.kjh.boardback.entity.board.Image;
 import com.kjh.boardback.repository.resultSet.GetBoardResultSet;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -24,12 +24,12 @@ public class GetBoardResponseDto extends ResponseDto {
     private String writerNickname;
     private String writerProfileImage;
 
-    private GetBoardResponseDto(GetBoardResultSet resultSet, List<ImageEntity> imageEntities) {
+    private GetBoardResponseDto(GetBoardResultSet resultSet, List<Image> imageEntities) {
         super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
 
         List<String> boardImageList = new ArrayList<>();
-        for(ImageEntity imageEntity : imageEntities){
-            String boardImage = imageEntity.getImage();
+        for(Image image : imageEntities){
+            String boardImage = image.getImage();
             boardImageList.add(boardImage);
         }
 
@@ -43,7 +43,7 @@ public class GetBoardResponseDto extends ResponseDto {
         this.writerProfileImage = resultSet.getWriterProfileImage();
     }
 
-    public static ResponseEntity<GetBoardResponseDto> success(GetBoardResultSet resultSet, List<ImageEntity> imageEntities){
+    public static ResponseEntity<GetBoardResponseDto> success(GetBoardResultSet resultSet, List<Image> imageEntities){
         GetBoardResponseDto result = new GetBoardResponseDto(resultSet,imageEntities);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }

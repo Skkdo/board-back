@@ -1,13 +1,13 @@
 package com.kjh.boardback.repository.board;
 
-import com.kjh.boardback.entity.board.BoardEntity;
+import com.kjh.boardback.entity.board.Board;
 import com.kjh.boardback.repository.resultSet.GetBoardResultSet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
+public interface BoardRepository extends JpaRepository<Board, Integer> {
 
     @Query(
             value =
@@ -26,7 +26,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     )
     GetBoardResultSet getBoard(Integer boardNumber);
 
-    BoardEntity findByBoardNumber(Integer boardNumber);
+    Board findByBoardNumber(Integer boardNumber);
 
     Boolean existsByBoardNumber(Integer boardNumber);
 }

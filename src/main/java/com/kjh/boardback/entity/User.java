@@ -63,5 +63,4 @@ public class User extends BaseEntity {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
-
 }
