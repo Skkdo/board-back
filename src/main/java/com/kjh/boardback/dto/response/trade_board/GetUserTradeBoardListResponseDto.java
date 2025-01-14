@@ -1,7 +1,7 @@
 package com.kjh.boardback.dto.response.trade_board;
 
-import com.kjh.boardback.common.ResponseCode;
-import com.kjh.boardback.common.ResponseMessage;
+import com.kjh.boardback.grobal.common.ResponseCode;
+import com.kjh.boardback.grobal.common.ResponseMessage;
 import com.kjh.boardback.dto.object.TradeBoardListItem;
 import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.entity.trade_board.TradeBoardListViewEntity;

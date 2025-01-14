@@ -1,11 +1,9 @@
 package com.kjh.boardback.dto.response.recipe_board;
 
-import com.kjh.boardback.common.ResponseCode;
-import com.kjh.boardback.common.ResponseMessage;
-import com.kjh.boardback.dto.object.CommentListItem;
+import com.kjh.boardback.grobal.common.ResponseCode;
+import com.kjh.boardback.grobal.common.ResponseMessage;
 import com.kjh.boardback.dto.object.RecipeCommentListItem;
 import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.repository.resultSet.GetCommentListResultSet;
 import com.kjh.boardback.repository.resultSet.GetRecipeCommentListResultSet;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

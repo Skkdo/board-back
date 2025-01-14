@@ -1,6 +1,6 @@
-package com.kjh.boardback.filter;
+package com.kjh.boardback.grobal.filter;
 import org.springframework.stereotype.Component;
-import com.kjh.boardback.provider.JwtProvider;
+import com.kjh.boardback.grobal.provider.JwtProvider;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;

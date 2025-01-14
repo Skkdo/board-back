@@ -8,7 +8,6 @@ import com.kjh.boardback.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, String>{
 
-    
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);
     boolean existsByTelNumber(String telNumber);

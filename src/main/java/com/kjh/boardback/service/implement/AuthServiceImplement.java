@@ -11,7 +11,7 @@ import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.dto.response.auth.SignInResponseDto;
 import com.kjh.boardback.dto.response.auth.SignUpResponseDto;
 import com.kjh.boardback.entity.User;
-import com.kjh.boardback.provider.JwtProvider;
+import com.kjh.boardback.grobal.provider.JwtProvider;
 import com.kjh.boardback.repository.UserRepository;
 import com.kjh.boardback.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,8 @@ public class AuthServiceImplement implements AuthService {
 
     @Override
     public ResponseEntity<? super SignUpResponseDto> signUp(SignUpRequestDto dto) {
+
+
 
         try {
             String email = dto.getEmail();

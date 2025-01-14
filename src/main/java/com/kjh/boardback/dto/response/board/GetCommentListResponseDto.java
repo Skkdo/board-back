@@ -1,7 +1,7 @@
 package com.kjh.boardback.dto.response.board;
 
-import com.kjh.boardback.common.ResponseCode;
-import com.kjh.boardback.common.ResponseMessage;
+import com.kjh.boardback.grobal.common.ResponseCode;
+import com.kjh.boardback.grobal.common.ResponseMessage;
 import com.kjh.boardback.dto.object.CommentListItem;
 import com.kjh.boardback.dto.response.ResponseDto;
 import com.kjh.boardback.repository.resultSet.GetCommentListResultSet;
