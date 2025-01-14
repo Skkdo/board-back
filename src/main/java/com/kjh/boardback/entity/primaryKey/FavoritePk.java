@@ -1,20 +1,15 @@
 package com.kjh.boardback.entity.primaryKey;
 
+import jakarta.persistence.Embeddable;
 import java.io.Serializable;
-
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class FavoritePk implements Serializable{
-    @Column(name = "user_email")
+@Embeddable
+@EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class FavoritePk implements Serializable {
     private String userEmail;
-    @Column(name = "board_number")
-    private int boardNumber;
+    private long boardNumber;
 }

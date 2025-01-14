@@ -1,18 +1,17 @@
 package com.kjh.boardback.repository.board;
 
 import com.kjh.boardback.repository.resultSet.GetCommentListResultSet;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.kjh.boardback.entity.board.CommentEntity;
+import com.kjh.boardback.entity.board.Comment;
 
 import java.util.List;
 
 @Repository
-public interface CommentRepository extends JpaRepository<CommentEntity, Integer>{
+public interface CommentRepository extends JpaRepository<Comment, Integer>{
 
     @Query(value =
             "SELECT "+
@@ -34,6 +33,6 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
     void deleteByBoardNumber(Integer boardNumber);
 
 
-    CommentEntity findByCommentNumber(Integer commentNUmber);
+    Comment findByCommentNumber(Integer commentNUmber);
 
 }

@@ -46,18 +46,18 @@ public class BoardServiceImplement implements BoardService {
             boolean existedEmail = userRepository.existsByEmail(email);
             if (!existedEmail) return DeleteCommentResponseDto.noExistUser();
 
-            CommentEntity commentEntity = commentRepository.findByCommentNumber(commentNumber);
-            if (commentEntity == null) return DeleteCommentResponseDto.noExistBoard();
+            Comment comment = commentRepository.findByCommentNumber(commentNumber);
+            if (comment == null) return DeleteCommentResponseDto.noExistBoard();
 
             String writerEmail = board.getWriterEmail();
-            String commentWriterEmail = commentEntity.getUserEmail();
+            String commentWriterEmail = comment.getUserEmail();
             boolean isWriter = writerEmail.equals(email);
             boolean isCommentWriter = commentWriterEmail.equals(email);
 
             if (!isWriter && !isCommentWriter) return DeleteCommentResponseDto.noPermission();
 
 
-            commentRepository.delete(commentEntity);
+            commentRepository.delete(comment);
             board.decreaseCommentCount();
             boardRepository.save(board);
 
@@ -77,16 +77,16 @@ public class BoardServiceImplement implements BoardService {
             Board board = boardRepository.findByBoardNumber(boardNumber);
             if (board == null) return PatchCommentResponseDto.noExistBoard();
 
-            CommentEntity commentEntity = commentRepository.findByCommentNumber(commentNumber);
-            if(commentEntity == null) return PatchCommentResponseDto.noExistBoard();
+            Comment comment = commentRepository.findByCommentNumber(commentNumber);
+            if(comment == null) return PatchCommentResponseDto.noExistBoard();
 
-            String commentWriterEmail = commentEntity.getUserEmail();
+            String commentWriterEmail = comment.getUserEmail();
             boolean isCommentWriter = commentWriterEmail.equals(email);
 
             if(!isCommentWriter) return PatchCommentResponseDto.noPermission();
 
-            commentEntity.patchComment(dto);
-            commentRepository.save(commentEntity);
+            comment.patchComment(dto);
+            commentRepository.save(comment);
 
         }catch (Exception exception){
             exception.printStackTrace();
@@ -270,8 +270,8 @@ public class BoardServiceImplement implements BoardService {
             boolean existedUser = userRepository.existsByEmail(email);
             if (!existedUser) return PostCommentResponseDto.noExistUser();
 
-            CommentEntity commentEntity = new CommentEntity(boardNumber, email, dto);
-            commentRepository.save(commentEntity);
+            Comment comment = new Comment(boardNumber, email, dto);
+            commentRepository.save(comment);
 
             board.increaseCommentCount();
             boardRepository.save(board);
@@ -312,13 +312,13 @@ public class BoardServiceImplement implements BoardService {
             Board board = boardRepository.findByBoardNumber(boardNumber);
             if (board == null) return PutFavoriteResponseDto.noExistBoard();
 
-            FavoriteEntity favoriteEntity = favoriteRepository.findByBoardNumberAndUserEmail(boardNumber, email);
-            if (favoriteEntity == null) {
-                favoriteEntity = new FavoriteEntity(email, boardNumber);
-                favoriteRepository.save(favoriteEntity);
+            Favorite favorite = favoriteRepository.findByBoardNumberAndUserEmail(boardNumber, email);
+            if (favorite == null) {
+                favorite = new Favorite(email, boardNumber);
+                favoriteRepository.save(favorite);
                 board.increaseFavoriteCount();
             } else {
-                favoriteRepository.delete(favoriteEntity);
+                favoriteRepository.delete(favorite);
                 board.decreaseFavoriteCount();
             }
             boardRepository.save(board);

@@ -23,7 +23,8 @@ public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int sequence;
+    @Column(name = "sequence")
+    private long sequence;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_number" , nullable = false)

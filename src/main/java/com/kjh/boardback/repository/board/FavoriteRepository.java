@@ -6,15 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.kjh.boardback.entity.board.FavoriteEntity;
+import com.kjh.boardback.entity.board.Favorite;
 import com.kjh.boardback.entity.primaryKey.FavoritePk;
 
 import java.util.List;
 
 @Repository
-public interface FavoriteRepository extends JpaRepository<FavoriteEntity, FavoritePk> {
+public interface FavoriteRepository extends JpaRepository<Favorite, FavoritePk> {
 
-    FavoriteEntity findByBoardNumberAndUserEmail(Integer boarNumber,String UserEmail);
+    Favorite findByBoardNumberAndUserEmail(Integer boarNumber, String UserEmail);
 
     @Query(
             value =
