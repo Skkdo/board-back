@@ -1,7 +1,7 @@
 package com.kjh.boardback.entity.board;
 
 import com.kjh.boardback.entity.User;
-import com.kjh.boardback.entity.primaryKey.FavoritePk;
+import com.kjh.boardback.entity.compositeKey.FavoritePk;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

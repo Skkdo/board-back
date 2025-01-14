@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.kjh.boardback.entity.board.Favorite;
-import com.kjh.boardback.entity.primaryKey.FavoritePk;
+import com.kjh.boardback.entity.compositeKey.FavoritePk;
 
 import java.util.List;
 

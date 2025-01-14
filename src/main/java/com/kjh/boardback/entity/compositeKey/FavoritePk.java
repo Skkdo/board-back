@@ -1,4 +1,4 @@
-package com.kjh.boardback.entity.primaryKey;
+package com.kjh.boardback.entity.compositeKey;
 
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;

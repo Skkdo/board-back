@@ -1,7 +1,6 @@
 package com.kjh.boardback.entity.recipe_board;
 
-import com.kjh.boardback.entity.primaryKey.RecipeFavoritePk;
-import com.kjh.boardback.entity.primaryKey.TradeFavoritePk;
+import com.kjh.boardback.entity.compositeKey.RecipeFavoritePk;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;

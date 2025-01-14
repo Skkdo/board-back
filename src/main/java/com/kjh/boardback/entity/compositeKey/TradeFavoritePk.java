@@ -1,4 +1,4 @@
-package com.kjh.boardback.entity.primaryKey;
+package com.kjh.boardback.entity.compositeKey;
 
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipeFavoritePk implements Serializable{
+public class TradeFavoritePk implements Serializable{
     @Column(name = "user_email")
     private String userEmail;
     @Column(name = "board_number")

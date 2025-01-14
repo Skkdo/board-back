@@ -1,8 +1,7 @@
 package com.kjh.boardback.repository.trade_board;
 
-import com.kjh.boardback.entity.primaryKey.TradeFavoritePk;
+import com.kjh.boardback.entity.compositeKey.TradeFavoritePk;
 import com.kjh.boardback.entity.trade_board.TradeFavoriteEntity;
-import com.kjh.boardback.entity.primaryKey.FavoritePk;
 import com.kjh.boardback.repository.resultSet.GetTradeFavoriteListResultSet;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;

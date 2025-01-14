@@ -1,11 +1,8 @@
 package com.kjh.boardback.repository.recipe_board;
 
-import com.kjh.boardback.entity.primaryKey.RecipeFavoritePk;
+import com.kjh.boardback.entity.compositeKey.RecipeFavoritePk;
 import com.kjh.boardback.entity.recipe_board.RecipeFavoriteEntity;
-import com.kjh.boardback.entity.trade_board.TradeFavoriteEntity;
-import com.kjh.boardback.entity.primaryKey.FavoritePk;
 import com.kjh.boardback.repository.resultSet.GetRecipeFavoriteListResultSet;
-import com.kjh.boardback.repository.resultSet.GetTradeFavoriteListResultSet;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
