@@ -20,13 +20,13 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
             "JOIN FETCH b.writer " +
             "WHERE (b.title LIKE %:title% OR b.content LIKE %:content%) " +
             "ORDER BY b.createdAt DESC")
-    List<Board> findBySearchWord(@Param("title") String title, @Param("content") String content);
+    List<Board> getBySearchWord(@Param("title") String title, @Param("content") String content);
 
     @Query("SELECT b FROM Board b " +
             "JOIN FETCH b.writer " +
             "WHERE b.createdAt >= CURRENT_DATE - 7 " +
             "ORDER BY b.viewCount DESC, b.favoriteCount DESC")
-    List<Board> findTop3Within7Days(Pageable pageable);
+    List<Board> getTop3Within7Days(Pageable pageable);
 
     @Query("SELECT b FROM Board b " +
             "JOIN FETCH b.writer " +

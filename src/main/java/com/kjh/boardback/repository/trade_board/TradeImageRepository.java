@@ -1,19 +1,14 @@
 package com.kjh.boardback.repository.trade_board;
 
-import com.kjh.boardback.entity.trade_board.TradeImageEntity;
-import jakarta.transaction.Transactional;
+import com.kjh.boardback.entity.trade_board.TradeImage;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
+public interface TradeImageRepository extends JpaRepository<TradeImage, Integer> {
 
-public interface TradeImageRepository extends JpaRepository<TradeImageEntity, Integer> {
+    void deleteByBoard_BoardNumber(Integer boardNumber);
 
-    List<TradeImageEntity> findByBoardNumber(Integer boardNumber);
-
-    @Transactional
-    void deleteByBoardNumber(Integer boardNumber);
-
+    List<TradeImage> findByBoard_BoardNumber(Integer boardNumber);
 }

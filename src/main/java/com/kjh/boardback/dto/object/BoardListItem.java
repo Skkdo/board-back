@@ -25,8 +25,8 @@ public class BoardListItem {
     private String writerNickname;
     private String writerProfileImage;
 
-    public BoardListItem(Board board, User user) {
-        BoardListItem.builder()
+    public static BoardListItem from(Board board, User user) {
+        return BoardListItem.builder()
                 .boardNumber(board.getBoardNumber())
                 .title(board.getTitle())
                 .content(board.getContent())
@@ -36,11 +36,12 @@ public class BoardListItem {
                 .viewCount(board.getViewCount())
                 .writeDatetime(board.getCreatedAt().toString())
                 .writerNickname(user.getNickname())
-                .writerProfileImage(user.getProfileImage());
+                .writerProfileImage(user.getProfileImage())
+                .build();
     }
 
-    public BoardListItem(Board board) {
-        BoardListItem.builder()
+    public static BoardListItem from(Board board) {
+        return BoardListItem.builder()
                 .boardNumber(board.getBoardNumber())
                 .title(board.getTitle())
                 .content(board.getContent())
@@ -50,22 +51,21 @@ public class BoardListItem {
                 .viewCount(board.getViewCount())
                 .writeDatetime(board.getCreatedAt().toString())
                 .writerNickname(board.getWriter().getNickname())
-                .writerProfileImage(board.getWriter().getProfileImage());
+                .writerProfileImage(board.getWriter().getProfileImage())
+                .build();
     }
 
     public static List<BoardListItem> getList(List<Board> boardList, User user) {
         return boardList.stream()
                 .map(board -> {
-                    return new BoardListItem(board, user);
+                    return BoardListItem.from(board, user);
                 })
                 .collect(Collectors.toList());
     }
 
     public static List<BoardListItem> getList(List<Board> boardList) {
         return boardList.stream()
-                .map(board -> {
-                    return new BoardListItem(board);
-                })
+                .map(BoardListItem::from)
                 .collect(Collectors.toList());
     }
 }

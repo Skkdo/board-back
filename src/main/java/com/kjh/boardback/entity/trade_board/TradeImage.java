@@ -1,5 +1,4 @@
-package com.kjh.boardback.entity.board;
-
+package com.kjh.boardback.entity.trade_board;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,22 +19,21 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Image {
+public class TradeImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sequence")
     private int sequence;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_number", nullable = false)
-    private Board board;
+    private TradeBoard board;
 
     @Column(name = "image", nullable = false)
     private String image;
 
-    public static Image from(Board board, String image) {
-        return Image.builder()
+    public static TradeImage from(TradeBoard board, String image) {
+        return TradeImage.builder()
                 .board(board)
                 .image(image)
                 .build();

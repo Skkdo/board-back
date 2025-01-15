@@ -1,34 +1,24 @@
 package com.kjh.boardback.repository.trade_board;
 
 import com.kjh.boardback.entity.compositeKey.TradeFavoritePk;
-import com.kjh.boardback.entity.trade_board.TradeFavoriteEntity;
-import com.kjh.boardback.repository.resultSet.GetTradeFavoriteListResultSet;
-import jakarta.transaction.Transactional;
+import com.kjh.boardback.entity.trade_board.TradeFavorite;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface TradeFavoriteRepository extends JpaRepository<TradeFavoriteEntity, TradeFavoritePk> {
+public interface TradeFavoriteRepository extends JpaRepository<TradeFavorite, TradeFavoritePk> {
 
-    TradeFavoriteEntity findByBoardNumberAndUserEmail(Integer boarNumber, String UserEmail);
+    @Query("SELECT f FROM TradeFavorite f "+
+            "JOIN FETCH f.user "+
+            "WHERE f.board.boardNumber = :boardNUmber ")
+    List<TradeFavorite> getFavoriteList(@Param("boardNumber") Integer boardNumber);
 
-    @Query(
-            value =
-                    "SELECT " +
-                            "U.email AS email, " +
-                            "U.nickname AS nickname, " +
-                            "U.profile_image AS profileImage " +
-                            "FROM trade_favorite AS F " +
-                            "INNER JOIN user AS U " +
-                            "ON F.user_email = U.email " +
-                            "WHERE F.board_number = ? ",
-            nativeQuery = true
-    )
-    List<GetTradeFavoriteListResultSet> getFavoriteList(Integer boardNumber);
 
-    @Transactional
-    void deleteByBoardNumber(Integer boardNumber);
+    Optional<TradeFavorite> findByBoard_BoardNumberAndUser_Email(Integer boardNumber, String email);
+
+    void deleteByBoard_BoardNumber(Integer boardNumber);
 }

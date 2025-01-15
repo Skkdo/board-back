@@ -1,34 +1,42 @@
 package com.kjh.boardback.repository.trade_board;
 
-import com.kjh.boardback.entity.trade_board.TradeBoardEntity;
-import com.kjh.boardback.repository.resultSet.GetTradeBoardResultSet;
+
+import com.kjh.boardback.entity.trade_board.TradeBoard;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TradeBoardRepository extends JpaRepository<TradeBoardEntity, Integer> {
+public interface TradeBoardRepository extends JpaRepository<TradeBoard, Integer> {
 
-    @Query(
-            value =
-                    "SELECT " +
-                            "B.board_number AS boardNumber, " +
-                            "B.title AS title, " +
-                            "B.content AS content, " +
-                            "B.write_datetime AS writeDatetime, " +
-                            "B.writer_email AS writerEmail, " +
-                            "B.trade_location AS tradeLocation, " +
-                            "B.price AS price, " +
-                            "U.nickname AS writerNickname, " +
-                            "U.profile_image AS writerProfileImage " +
-                            "FROM trade_board AS B " +
-                            "INNER JOIN `user` AS U ON B.writer_email = U.email " +
-                            "WHERE board_number = ?1 ",
-            nativeQuery = true
-    )
-    GetTradeBoardResultSet getTradeBoard(Integer boardNumber);
+    Optional<TradeBoard> findByBoardNumber(Integer boardNumber);
 
-    TradeBoardEntity findByBoardNumber(Integer boardNumber);
+    List<TradeBoard> findByWriter_EmailOrderByCreatedAtDesc(String writerEmail);
 
-    Boolean existsByBoardNumber(Integer boardNumber);
+    @Query("SELECT b FROM TradeBoard b " +
+            "JOIN FETCH b.writer " +
+            "WHERE (b.title LIKE %:title% OR b.content LIKE %:content%) " +
+            "ORDER BY b.createdAt DESC")
+    List<TradeBoard> getBySearchWord(@Param("title") String title, @Param("content") String content);
+
+    @Query("SELECT b FROM TradeBoard b " +
+            "JOIN FETCH b.writer " +
+            "WHERE b.createdAt >= CURRENT_DATE - 7 " +
+            "ORDER BY b.viewCount DESC, b.favoriteCount DESC")
+    List<TradeBoard> getTop3Within7Days(Pageable pageable);
+
+    @Query("SELECT b FROM TradeBoard b " +
+            "JOIN FETCH b.writer " +
+            "ORDER BY b.createdAt DESC")
+    List<TradeBoard> getLatestBoardList();
+
+    @Query("SELECT b FROM TradeBoard b " +
+            "JOIN FETCH b.writer " +
+            "WHERE b.boardNumber = :boardNumber")
+    Optional<TradeBoard> getBoardWithWriter(@Param("boardNumber") Integer boardNumber);
+
 }

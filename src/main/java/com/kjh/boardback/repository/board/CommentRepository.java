@@ -15,7 +15,7 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     @Query("SELECT c FROM Comment c "+
             "JOIN FETCH c.writer "+
             "WHERE c.board.boardNumber = :boardNumber "+
-            "ORDER BY c.createdAt DESC")
+            "ORDER BY c.createdAt ASC ")
     List<Comment> getCommentList(@Param("boardNumber") Integer boardNumber);
 
     Optional<Comment> findByCommentNumber(Integer commentNUmber);

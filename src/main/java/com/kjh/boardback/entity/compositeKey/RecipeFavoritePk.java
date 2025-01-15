@@ -1,20 +1,15 @@
 package com.kjh.boardback.entity.compositeKey;
 
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import jakarta.persistence.Embeddable;
 import java.io.Serializable;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class RecipeFavoritePk implements Serializable{
-    @Column(name = "user_email")
+@Embeddable
+@EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class RecipeFavoritePk implements Serializable {
     private String userEmail;
-    @Column(name = "board_number")
     private int boardNumber;
 }

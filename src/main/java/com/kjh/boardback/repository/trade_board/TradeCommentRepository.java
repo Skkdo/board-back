@@ -1,35 +1,23 @@
 package com.kjh.boardback.repository.trade_board;
 
-import com.kjh.boardback.entity.trade_board.TradeCommentEntity;
-import com.kjh.boardback.repository.resultSet.GetTradeCommentListResultSet;
-import jakarta.transaction.Transactional;
+import com.kjh.boardback.entity.trade_board.TradeComment;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface TradeCommentRepository extends JpaRepository<TradeCommentEntity, Integer> {
+public interface TradeCommentRepository extends JpaRepository<TradeComment, Integer> {
 
-    @Query(value =
-            "SELECT " +
-                    "U.nickname AS nickname, " +
-                    "U.profile_image AS profileImage, " +
-                    "C.comment_number AS commentNumber, " +
-                    "C.write_datetime AS writeDatetime, " +
-                    "C.content AS content " +
-                    "FROM trade_comment AS C " +
-                    "INNER JOIN `user` AS U " +
-                    "ON C.user_email = U.email " +
-                    "WHERE C.board_number = ? " +
-                    "ORDER BY write_datetime DESC ",
-            nativeQuery = true
-    )
-    List<GetTradeCommentListResultSet> getCommentList(int boardNumber);
+    @Query("SELECT c FROM TradeComment c "+
+            "JOIN FETCH c.writer "+
+            "WHERE c.board.boardNumber = :boardNumber "+
+            "ORDER BY c.createdAt ASC ")
+    List<TradeComment> getCommentList(@Param("boardNumber") Integer boardNumber);
 
-    @Transactional
-    void deleteByBoardNumber(Integer boardNumber);
+    Optional<TradeComment> findByCommentNumber(Integer commentNumber);
 
-    TradeCommentEntity findByCommentNumber(Integer commentNumber);
+    void deleteByBoard_BoardNumber(Integer boardNUmber);
 }

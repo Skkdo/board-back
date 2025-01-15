@@ -1,7 +1,7 @@
-package com.kjh.boardback.entity.board;
+package com.kjh.boardback.entity.trade_board;
 
-import com.kjh.boardback.dto.request.board.PatchBoardRequestDto;
-import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
+import com.kjh.boardback.dto.request.trade_board.PatchTradeBoardRequestDto;
+import com.kjh.boardback.dto.request.trade_board.PostTradeBoardRequestDto;
 import com.kjh.boardback.entity.BaseEntity;
 import com.kjh.boardback.entity.User;
 import jakarta.persistence.Column;
@@ -23,15 +23,14 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("is_deleted = false")
-@SQLDelete(sql = "UPDATE board SET is_deleted = true WHERE board_number = ?")
-public class Board extends BaseEntity {
+@SQLDelete(sql = "UPDATE trade_board SET is_deleated = true WHERE board_number = ?")
+public class TradeBoard extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "board_number")
     private int boardNumber;
 
     @Column(name = "title", nullable = false)
@@ -40,21 +39,28 @@ public class Board extends BaseEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "title_image", nullable = true)
+    @Column(name = "title_umage", nullable = true)
     private String titleImage;
 
-    @Column(name = "favorite_count", nullable = false)
+    @Column(name = "favoriteCount", nullable = false)
     private int favoriteCount;
 
-    @Column(name = "comment_count", nullable = false)
+    @Column(name = "commentCount", nullable = false)
     private int commentCount;
 
-    @Column(name = "view_count", nullable = false)
+    @Column(name = "viewCount", nullable = false)
     private int viewCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_email", nullable = false)
+    @JoinColumn(name = "writer_email")
     private User writer;
+
+    @Column(name = "tradeLocation", nullable = true)
+    private String tradeLocation;
+
+    @Column(name = "price", nullable = true)
+    private String price;
+
 
     public void increaseViewCount() {
         this.viewCount++;
@@ -76,18 +82,19 @@ public class Board extends BaseEntity {
         this.favoriteCount--;
     }
 
-    public void patchBoard(PatchBoardRequestDto dto) {
-        this.title = dto.getTitle();
-        this.content = dto.getContent();
+    public void patchBoard(PatchTradeBoardRequestDto requestDto) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.tradeLocation = requestDto.getTradeLocation();
+        this.price = requestDto.getPrice();
     }
 
-    public static Board from(PostBoardRequestDto dto, User user) {
+    public static TradeBoard from(PostTradeBoardRequestDto dto, User user) {
         String titleImage = null;
-        if (!dto.getBoardImageList().isEmpty()) {
+        if (!dto.getBoardImageList().isEmpty()){
             titleImage = dto.getBoardImageList().get(0);
         }
-
-        return Board.builder()
+        return TradeBoard.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .titleImage(titleImage)
@@ -95,6 +102,9 @@ public class Board extends BaseEntity {
                 .commentCount(0)
                 .viewCount(0)
                 .writer(user)
+                .tradeLocation(dto.getTradeLocation())
+                .price(dto.getPrice())
                 .build();
     }
+
 }

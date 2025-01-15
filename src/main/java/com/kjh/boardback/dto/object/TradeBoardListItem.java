@@ -1,15 +1,11 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.entity.trade_board.TradeBoardListViewEntity;
+import com.kjh.boardback.entity.trade_board.TradeBoard;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class TradeBoardListItem {
     private int boardNumber;
@@ -25,27 +21,22 @@ public class TradeBoardListItem {
     private String writerNickname;
     private String writerProfileImage;
 
-    public TradeBoardListItem(TradeBoardListViewEntity tradeBoardListViewEntity) {
-        this.boardNumber = tradeBoardListViewEntity.getBoardNumber();
-        this.title = tradeBoardListViewEntity.getTitle();
-        this.content = tradeBoardListViewEntity.getContent();
-        this.boardTitleImage = tradeBoardListViewEntity.getTitleImage();
-        this.favoriteCount = tradeBoardListViewEntity.getFavoriteCount();
-        this.commentCount = tradeBoardListViewEntity.getCommentCount();
-        this.viewCount = tradeBoardListViewEntity.getViewCount();
-        this.writeDatetime = tradeBoardListViewEntity.getWriteDatetime();
-        this.tradeLocation = tradeBoardListViewEntity.getTradeLocation();
-        this.price = tradeBoardListViewEntity.getPrice();
-        this.writerNickname = tradeBoardListViewEntity.getWriterNickname();
-        this.writerProfileImage = tradeBoardListViewEntity.getWriterProfileImage();
+    public TradeBoardListItem(TradeBoard board) {
+        this.boardNumber = board.getBoardNumber();
+        this.title = board.getTitle();
+        this.content = board.getContent();
+        this.boardTitleImage = board.getTitleImage();
+        this.favoriteCount = board.getFavoriteCount();
+        this.commentCount = board.getCommentCount();
+        this.viewCount = board.getViewCount();
+        this.writeDatetime = board.getCreatedAt().toString();
+        this.tradeLocation = board.getTradeLocation();
+        this.price = board.getPrice();
+        this.writerNickname = board.getWriter().getNickname();
+        this.writerProfileImage = board.getWriter().getProfileImage();
     }
 
-    public static List<TradeBoardListItem> getList(List<TradeBoardListViewEntity>tradeBoardListViewEntities ){
-        List<TradeBoardListItem> tradeBoardListItems = new ArrayList<>();
-        for(TradeBoardListViewEntity tradeBoardListViewEntity : tradeBoardListViewEntities){
-            TradeBoardListItem tradeBoardListItem = new TradeBoardListItem(tradeBoardListViewEntity);
-            tradeBoardListItems.add(tradeBoardListItem);
-        }
-        return tradeBoardListItems;
+    public static List<TradeBoardListItem> getList(List<TradeBoard> latestList) {
+        return latestList.stream().map(TradeBoardListItem::new).toList();
     }
 }

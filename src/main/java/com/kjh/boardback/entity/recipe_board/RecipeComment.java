@@ -1,7 +1,8 @@
-package com.kjh.boardback.entity.board;
+package com.kjh.boardback.entity.recipe_board;
 
 import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
+import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
 import com.kjh.boardback.entity.BaseEntity;
 import com.kjh.boardback.entity.User;
 import jakarta.persistence.Column;
@@ -17,7 +18,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -27,32 +27,33 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("is_deleted = false")
-@SQLDelete(sql = "UPDATE comment SET is_deleted = true WHERE comment_number = ?")
-public class Comment extends BaseEntity {
-    
+@SQLDelete(sql = "UPDATE recipe_comment SET is_deleted = true WHERE comment_number = ?")
+public class RecipeComment extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_number")
     private int commentNumber;
 
-    @Column(name = "content" , nullable = false)
+    @Column(name = "content", nullable = false)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_email" , nullable = false)
+    @JoinColumn(name = "writer_email", nullable = false)
     private User writer;
 
-    @ManyToOne( fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_number" , nullable = false)
-    private Board board;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_number", nullable = false)
+    private RecipeBoard board;
 
-    public void patchComment(PatchCommentRequestDto dto){
+    public void patchComment(PatchCommentRequestDto dto) {
         this.content = dto.getContent();
     }
 
-    public Comment(Board board, User user, PostCommentRequestDto dto){
-        this.content = dto.getContent();
-        this.writer = user;
-        this.board = board;
+    public static RecipeComment from(RecipeBoard board, User user, PostRecipeCommentRequestDto dto) {
+        return RecipeComment.builder()
+                .board(board)
+                .writer(user)
+                .content(dto.getContent())
+                .build();
     }
 }

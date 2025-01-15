@@ -40,5 +40,4 @@ public class PostRecipeBoardRequestDto {
     private String step7_content;
     private String step8_image;
     private String step8_content;
-
 }

@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FavoritePk implements Serializable {
     private String userEmail;
-    private long boardNumber;
+    private int boardNumber;
 }

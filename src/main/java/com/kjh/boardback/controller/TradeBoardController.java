@@ -1,17 +1,32 @@
 package com.kjh.boardback.controller;
 
-import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PatchTradeBoardRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PatchTradeCommentRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PostTradeBoardRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PostTradeCommentRequestDto;
-import com.kjh.boardback.dto.response.trade_board.*;
+import com.kjh.boardback.dto.response.trade_board.GetLatestTradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetSearchTradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTop3TradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeBoardResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeCommentListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeFavoriteListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetUserTradeBoardListResponseDto;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import com.kjh.boardback.service.TradeBoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RequiredArgsConstructor
@@ -22,131 +37,133 @@ public class TradeBoardController {
     private final TradeBoardService boardService;
 
     @GetMapping("/latest-list")
-    public ResponseEntity<? super GetLatestTradeBoardListResponseDto> getLatestBoardList(){
-        ResponseEntity<? super GetLatestTradeBoardListResponseDto> response = boardService.getLatestBoardList();
-        return response;
+    public ResponseEntity<GetLatestTradeBoardListResponseDto> getLatestBoardList() {
+        GetLatestTradeBoardListResponseDto response = boardService.getLatestBoardList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{boardNumber}")
-    public ResponseEntity<? super GetTradeBoardResponseDto> getBoard(
-        @PathVariable("boardNumber") Integer boardNumber
-    ){
-        ResponseEntity<? super GetTradeBoardResponseDto> response = boardService.getBoard(boardNumber);
-        return response;
+    public ResponseEntity<GetTradeBoardResponseDto> getBoard(
+            @PathVariable("boardNumber") Integer boardNumber
+    ) {
+        GetTradeBoardResponseDto response = boardService.getBoard(boardNumber);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("")
-    public ResponseEntity<? super PostTradeBoardResponseDto> postBoard(
+    public ResponseEntity<ResponseDto> postBoard(
             @AuthenticationPrincipal String email,
             @RequestBody @Valid PostTradeBoardRequestDto requestDto
-            ){
-        ResponseEntity<? super PostTradeBoardResponseDto> response = boardService.postBoard(requestDto, email);
-        return response;
+    ) {
+        boardService.postBoard(requestDto, email);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
     @PatchMapping("/{boardNumber}")
-    public ResponseEntity<? super PatchTradeBoardResponseDto> patchBoard(
+    public ResponseEntity<ResponseDto> patchBoard(
             @AuthenticationPrincipal String email,
             @RequestBody @Valid PatchTradeBoardRequestDto requestDto,
             @PathVariable("boardNumber") Integer boardNumber
-            ){
-        ResponseEntity<? super PatchTradeBoardResponseDto> response = boardService.patchBoard(requestDto, email, boardNumber);
-        return response;
+    ) {
+        boardService.patchBoard(requestDto, email, boardNumber);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
     @DeleteMapping("/{boardNumber}")
-    public ResponseEntity<? super DeleteTradeBoardResponseDto> deleteBoard(
+    public ResponseEntity<ResponseDto> deleteBoard(
             @AuthenticationPrincipal String email,
             @PathVariable("boardNumber") Integer boardNumber
-    ){
-        ResponseEntity<? super DeleteTradeBoardResponseDto> response = boardService.deleteBoard(email, boardNumber);
-        return response;
+    ) {
+        boardService.deleteBoard(email, boardNumber);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
     @GetMapping("/{boardNumber}/favorite-list")
-    public ResponseEntity<? super GetTradeFavoriteListResponseDto> getFavoriteList(
+    public ResponseEntity<GetTradeFavoriteListResponseDto> getFavoriteList(
             @PathVariable("boardNumber") Integer boardNumber
     ) {
-        ResponseEntity<? super GetTradeFavoriteListResponseDto> response = boardService.getFavoriteList(boardNumber);
-        return response;
+        GetTradeFavoriteListResponseDto response = boardService.getFavoriteList(boardNumber);
+        return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/{boardNumber}/comment-list")
-    public ResponseEntity<? super GetTradeCommentListResponseDto> getCommentList(
+    public ResponseEntity<GetTradeCommentListResponseDto> getCommentList(
             @PathVariable("boardNumber") Integer boardNumber
     ) {
-        ResponseEntity<? super GetTradeCommentListResponseDto> response = boardService.getCommentList(boardNumber);
-        return response;
+        GetTradeCommentListResponseDto response = boardService.getCommentList(boardNumber);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{boardNumber}/increase-view-count")
-    public ResponseEntity<? super IncreaseTradeViewCountResponseDto> increaseViewCount(
+    public ResponseEntity<ResponseDto> increaseViewCount(
             @PathVariable("boardNumber") Integer boardNumber
     ) {
-        ResponseEntity<? super IncreaseTradeViewCountResponseDto> response = boardService.increaseViewCount(boardNumber);
-        return response;
-    }
-    @GetMapping("/top-3")
-    public ResponseEntity<? super GetTop3TradeBoardListResponseDto> getTop3BoardList(){
-        ResponseEntity<? super GetTop3TradeBoardListResponseDto> response = boardService.getTop3BoardList();
-        return response;
+        boardService.increaseViewCount(boardNumber);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
-    @GetMapping(value = {"/search-list/{searchWord}","/search-list/{searchWord}/{preSearchWord}"})
-    public ResponseEntity<? super GetSearchTradeBoardListResponseDto> getSearchBoardList(
+    @GetMapping("/top-3")
+    public ResponseEntity<GetTop3TradeBoardListResponseDto> getTop3BoardList() {
+        GetTop3TradeBoardListResponseDto response = boardService.getTop3BoardList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = {"/search-list/{searchWord}", "/search-list/{searchWord}/{preSearchWord}"})
+    public ResponseEntity<GetSearchTradeBoardListResponseDto> getSearchBoardList(
             @PathVariable("searchWord") String searchWord,
-            @PathVariable(value = "preSearchWord",required = false) String PreSearchWord
-    ){
-        ResponseEntity<? super GetSearchTradeBoardListResponseDto> response = boardService.getSearchBoardList(searchWord, PreSearchWord);
-        return response;
+            @PathVariable(value = "preSearchWord", required = false) String PreSearchWord
+    ) {
+        GetSearchTradeBoardListResponseDto response = boardService.getSearchBoardList(searchWord, PreSearchWord);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user-board-list/{email}")
-    public ResponseEntity<? super GetUserTradeBoardListResponseDto> getUserBoardList(
+    public ResponseEntity<GetUserTradeBoardListResponseDto> getUserBoardList(
             @PathVariable("email") String email
-    ){
-        ResponseEntity<? super GetUserTradeBoardListResponseDto> response = boardService.getUserBoardList(email);
-        return response;
+    ) {
+        GetUserTradeBoardListResponseDto response = boardService.getUserBoardList(email);
+        return ResponseEntity.ok(response);
     }
+
     @PostMapping("/{boardNumber}/comment")
-    public ResponseEntity<? super PostTradeCommentResponseDto> postComment(
+    public ResponseEntity<ResponseDto> postComment(
             @PathVariable("boardNumber") Integer boardNumber,
             @AuthenticationPrincipal String email,
             @RequestBody @Valid PostTradeCommentRequestDto dto
     ) {
-        ResponseEntity<? super PostTradeCommentResponseDto> response = boardService.postComment(boardNumber, email, dto);
-        return response;
+        boardService.postComment(boardNumber, email, dto);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
 
     @PutMapping("/{boardNumber}/favorite")
-    public ResponseEntity<? super PutTradeFavoriteResponseDto> putFavorite(
+    public ResponseEntity<ResponseDto> putFavorite(
             @PathVariable("boardNumber") Integer boardNumber,
             @AuthenticationPrincipal String email
     ) {
-        ResponseEntity<? super PutTradeFavoriteResponseDto> response = boardService.putFavorite(email, boardNumber);
-        return response;
+        boardService.putFavorite(email, boardNumber);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
     @PatchMapping("/{boardNumber}/{commentNumber}")
-    public ResponseEntity<? super PatchTradeCommentResponseDto> patchComment(
+    public ResponseEntity<ResponseDto> patchComment(
             @AuthenticationPrincipal String email,
             @RequestBody @Valid PatchTradeCommentRequestDto dto,
             @PathVariable("boardNumber") Integer boardNumber,
             @PathVariable("commentNumber") Integer commentNumber
-    ){
-        ResponseEntity<? super PatchTradeCommentResponseDto> response = boardService.patchComment(boardNumber, commentNumber, email, dto);
-        return response;
+    ) {
+        boardService.patchComment(boardNumber, commentNumber, email, dto);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
+
     @DeleteMapping("/{boardNumber}/{commentNumber}")
-    public ResponseEntity<? super DeleteTradeCommentResponseDto> deleteComment(
+    public ResponseEntity<ResponseDto> deleteComment(
             @AuthenticationPrincipal String email,
             @PathVariable("boardNumber") Integer boardNumber,
             @PathVariable("commentNumber") Integer commentNumber
-    ){
-        ResponseEntity<? super DeleteTradeCommentResponseDto> response = boardService.deleteComment(boardNumber, commentNumber, email);
-        return response;
+    ) {
+        boardService.deleteComment(boardNumber, commentNumber, email);
+        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
     }
 
 }

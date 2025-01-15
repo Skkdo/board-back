@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class FavoriteListItem {
     private String email;
     private String nickname;
@@ -23,9 +22,7 @@ public class FavoriteListItem {
 
     public static List<FavoriteListItem> getList(List<Favorite> favoriteList) {
         return favoriteList.stream()
-                .map(favorite -> {
-                    return new FavoriteListItem(favorite);
-                })
+                .map(FavoriteListItem::new)
                 .toList();
     }
 }

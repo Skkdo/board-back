@@ -1,5 +1,4 @@
-package com.kjh.boardback.entity.board;
-
+package com.kjh.boardback.entity.recipe_board;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,24 +19,27 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Image {
+public class RecipeImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sequence")
     private int sequence;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_number", nullable = false)
-    private Board board;
+    private RecipeBoard board;
 
     @Column(name = "image", nullable = false)
     private String image;
 
-    public static Image from(Board board, String image) {
-        return Image.builder()
+    @Column(name = "step", nullable = false)
+    private int step;
+
+    public static RecipeImage from(RecipeBoard board, String image, int step) {
+        return RecipeImage.builder()
                 .board(board)
                 .image(image)
+                .step(step)
                 .build();
     }
 }

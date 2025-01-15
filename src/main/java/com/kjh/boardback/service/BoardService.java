@@ -11,7 +11,7 @@ import com.kjh.boardback.dto.response.board.GetLatestBoardListResponseDto;
 import com.kjh.boardback.dto.response.board.GetSearchBoardListResponseDto;
 import com.kjh.boardback.dto.response.board.GetTop3BoardListResponseDto;
 import com.kjh.boardback.dto.response.board.GetUserBoardListResponseDto;
-import com.kjh.boardback.entity.SearchLogEntity;
+import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.board.Board;
 import com.kjh.boardback.entity.board.Comment;
@@ -102,15 +102,15 @@ public class BoardService {
 
     public GetSearchBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
 
-        List<Board> boardList = boardRepository.findBySearchWord(searchWord, searchWord);
+        List<Board> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
 
-        SearchLogEntity searchLogEntity = new SearchLogEntity(searchWord, preSearchWord, false);
-        searchLogRepository.save(searchLogEntity);
+        SearchLog searchLog = new SearchLog(searchWord, preSearchWord, false);
+        searchLogRepository.save(searchLog);
 
         boolean relation = preSearchWord != null;
         if (relation) {
-            searchLogEntity = new SearchLogEntity(preSearchWord, searchWord, relation);
-            searchLogRepository.save(searchLogEntity);
+            searchLog = new SearchLog(preSearchWord, searchWord, relation);
+            searchLogRepository.save(searchLog);
         }
 
         return new GetSearchBoardListResponseDto(boardList);
@@ -119,7 +119,7 @@ public class BoardService {
     public GetTop3BoardListResponseDto getTop3BoardList() {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
-        List<Board> top3List = boardRepository.findTop3Within7Days(pageable);
+        List<Board> top3List = boardRepository.getTop3Within7Days(pageable);
 
         return new GetTop3BoardListResponseDto(top3List);
     }
@@ -148,7 +148,7 @@ public class BoardService {
         List<Image> imageEntities = new ArrayList<>();
         List<String> boardImageList = dto.getBoardImageList();
         for (String image : boardImageList) {
-            Image imageEntity = new Image(board, image);
+            Image imageEntity = Image.from(board, image);
             imageEntities.add(imageEntity);
         }
         imageRepository.saveAll(imageEntities);
@@ -189,7 +189,6 @@ public class BoardService {
 
     @Transactional
     public void postComment(Integer boardNumber, String email, PostCommentRequestDto dto) {
-
         Board board = findByBoardNumber(boardNumber);
         User user = userService.findByEmail(email);
 
@@ -231,7 +230,6 @@ public class BoardService {
     }
 
     public GetBoardResponseDto getBoard(Integer boardNumber) {
-
         Board board = boardRepository.getBoardWithWriter(boardNumber).orElseThrow(
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
         List<Image> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
@@ -239,16 +237,15 @@ public class BoardService {
     }
 
     public void postBoard(PostBoardRequestDto dto, String email) {
-
         User user = userService.findByEmail(email);
-        Board board = new Board(dto, user);
+        Board board = Board.from(dto, user);
         boardRepository.save(board);
 
         List<String> boardImageList = dto.getBoardImageList();
         List<Image> imageEntities = new ArrayList<>();
 
         for (String image : boardImageList) {
-            Image imageEntity = new Image(board, image);
+            Image imageEntity = Image.from(board, image);
             imageEntities.add(imageEntity);
         }
         imageRepository.saveAll(imageEntities);

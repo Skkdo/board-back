@@ -1,37 +1,23 @@
 package com.kjh.boardback.repository.recipe_board;
 
-import com.kjh.boardback.entity.recipe_board.RecipeCommentEntity;
-import com.kjh.boardback.entity.trade_board.TradeCommentEntity;
-import com.kjh.boardback.repository.resultSet.GetRecipeCommentListResultSet;
-import com.kjh.boardback.repository.resultSet.GetTradeCommentListResultSet;
-import jakarta.transaction.Transactional;
+import com.kjh.boardback.entity.recipe_board.RecipeComment;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface RecipeCommentRepository extends JpaRepository<RecipeCommentEntity, Integer> {
+public interface RecipeCommentRepository extends JpaRepository<RecipeComment, Integer> {
 
-    @Query(value =
-            "SELECT " +
-                    "U.nickname AS nickname, " +
-                    "U.profile_image AS profileImage, " +
-                    "C.write_datetime AS writeDatetime, " +
-                    "C.content AS content, " +
-                    "C.comment_number AS commentNumber " +
-                    "FROM recipe_comment AS C " +
-                    "INNER JOIN `user` AS U " +
-                    "ON C.user_email = U.email " +
-                    "WHERE C.board_number = ? " +
-                    "ORDER BY write_datetime DESC ",
-            nativeQuery = true
-    )
-    List<GetRecipeCommentListResultSet> getCommentList(int boardNumber);
+    @Query("SELECT c FROM RecipeComment c " +
+            "JOIN FETCH c.writer " +
+            "WHERE c.board.boardNumber = :boardNumber "+
+            "ORDER BY c.createdAt ASC ")
+    List<RecipeComment> getCommentListWithUser(@Param("boardNumber") Integer boardNumber);
 
-    @Transactional
-    void deleteByBoardNumber(Integer boardNumber);
+    Optional<RecipeComment> findByCommentNumber(Integer commentNumber);
 
-    RecipeCommentEntity findByCommentNumber(Integer commentNumber);
+    void deleteByBoard_BoardNumber(Integer boardNumber);
 }
