@@ -2,6 +2,7 @@ package com.kjh.boardback.repository.trade_board;
 
 
 import com.kjh.boardback.entity.trade_board.TradeBoard;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +26,9 @@ public interface TradeBoardRepository extends JpaRepository<TradeBoard, Integer>
 
     @Query("SELECT b FROM TradeBoard b " +
             "JOIN FETCH b.writer " +
-            "WHERE b.createdAt >= CURRENT_DATE - 7 " +
+            "WHERE b.createdAt >= :sevenDaysAgo " +
             "ORDER BY b.viewCount DESC, b.favoriteCount DESC")
-    List<TradeBoard> getTop3Within7Days(Pageable pageable);
+    List<TradeBoard> getTop3Within7Days(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo, Pageable pageable);
 
     @Query("SELECT b FROM TradeBoard b " +
             "JOIN FETCH b.writer " +

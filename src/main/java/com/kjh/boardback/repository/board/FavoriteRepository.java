@@ -14,7 +14,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, FavoritePk> 
 
   @Query("SELECT f FROM Favorite f "+
           "JOIN FETCH f.user "+
-          "WHERE f.board.boardNumber = :boardNUmber ")
+          "WHERE f.board.boardNumber = :boardNumber")
   List<Favorite> getFavoriteList(@Param("boardNumber") Integer boardNumber);
 
   void deleteByBoard_BoardNumber(Integer boardNumber);

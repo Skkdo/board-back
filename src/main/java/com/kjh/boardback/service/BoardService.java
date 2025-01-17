@@ -24,6 +24,7 @@ import com.kjh.boardback.repository.board.BoardRepository;
 import com.kjh.boardback.repository.board.CommentRepository;
 import com.kjh.boardback.repository.board.FavoriteRepository;
 import com.kjh.boardback.repository.board.ImageRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,42 +57,11 @@ public class BoardService {
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_COMMENT));
     }
 
-    @Transactional
-    public void deleteComment(Integer boardNumber, String email, Integer commentNumber) {
-
-        Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
-        Comment comment = findByCommentNumber(commentNumber);
-
-        String writerEmail = board.getWriter().getEmail();
-        String commentWriterEmail = comment.getWriter().getEmail();
-
-        boolean isWriter = writerEmail.equals(email);
-        boolean isCommentWriter = commentWriterEmail.equals(email);
-        if (!isWriter && !isCommentWriter) {
-            throw new BusinessException(ResponseCode.NO_PERMISSION);
-        }
-
-        commentRepository.delete(comment);
-        board.decreaseCommentCount();
-        boardRepository.save(board);
-    }
-
-    @Transactional
-    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
-
-        userService.findByEmail(email);
-        findByBoardNumber(boardNumber);
-
-        Comment comment = findByCommentNumber(commentNumber);
-        String commentWriterEmail = comment.getWriter().getEmail();
-        boolean isCommentWriter = commentWriterEmail.equals(email);
-        if (!isCommentWriter) {
-            throw new BusinessException(ResponseCode.NO_PERMISSION);
-        }
-
-        comment.patchComment(dto);
-        commentRepository.save(comment);
+    public GetBoardResponseDto getBoard(Integer boardNumber) {
+        Board board = boardRepository.getBoardWithWriter(boardNumber).orElseThrow(
+                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
+        List<Image> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
+        return new GetBoardResponseDto(board, imageList);
     }
 
     public GetUserBoardListResponseDto getUserBoardList(String email) {
@@ -119,7 +89,8 @@ public class BoardService {
     public GetTop3BoardListResponseDto getTop3BoardList() {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
-        List<Board> top3List = boardRepository.getTop3Within7Days(pageable);
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo,pageable);
 
         return new GetTop3BoardListResponseDto(top3List);
     }
@@ -127,6 +98,29 @@ public class BoardService {
     public GetLatestBoardListResponseDto getLatestBoardList() {
         List<Board> latestBoardList = boardRepository.getLatestBoardList();
         return new GetLatestBoardListResponseDto(latestBoardList);
+    }
+
+    @Transactional
+    public void increaseViewCount(Integer boardNumber) {
+        Board board = findByBoardNumber(boardNumber);
+        board.increaseViewCount();
+        boardRepository.save(board);
+    }
+
+    @Transactional
+    public void postBoard(PostBoardRequestDto dto, String email) {
+        User user = userService.findByEmail(email);
+        Board board = Board.from(dto, user);
+        boardRepository.save(board);
+
+        List<String> boardImageList = dto.getBoardImageList();
+        List<Image> imageEntities = new ArrayList<>();
+
+        for (String image : boardImageList) {
+            Image imageEntity = Image.from(board, image);
+            imageEntities.add(imageEntity);
+        }
+        imageRepository.saveAll(imageEntities);
     }
 
     @Transactional
@@ -172,13 +166,6 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
-    @Transactional
-    public void increaseViewCount(Integer boardNumber) {
-        Board board = findByBoardNumber(boardNumber);
-        board.increaseViewCount();
-        boardRepository.save(board);
-    }
-
     public GetCommentListResponseDto getCommentList(Integer boardNumber) {
 
         findByBoardNumber(boardNumber);
@@ -196,6 +183,44 @@ public class BoardService {
         commentRepository.save(comment);
 
         board.increaseCommentCount();
+        boardRepository.save(board);
+    }
+
+    @Transactional
+    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
+
+        userService.findByEmail(email);
+        findByBoardNumber(boardNumber);
+
+        Comment comment = findByCommentNumber(commentNumber);
+        String commentWriterEmail = comment.getWriter().getEmail();
+        boolean isCommentWriter = commentWriterEmail.equals(email);
+        if (!isCommentWriter) {
+            throw new BusinessException(ResponseCode.NO_PERMISSION);
+        }
+
+        comment.patchComment(dto);
+        commentRepository.save(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Integer boardNumber, String email, Integer commentNumber) {
+
+        Board board = findByBoardNumber(boardNumber);
+        userService.findByEmail(email);
+        Comment comment = findByCommentNumber(commentNumber);
+
+        String writerEmail = board.getWriter().getEmail();
+        String commentWriterEmail = comment.getWriter().getEmail();
+
+        boolean isWriter = writerEmail.equals(email);
+        boolean isCommentWriter = commentWriterEmail.equals(email);
+        if (!isWriter && !isCommentWriter) {
+            throw new BusinessException(ResponseCode.NO_PERMISSION);
+        }
+
+        commentRepository.delete(comment);
+        board.decreaseCommentCount();
         boardRepository.save(board);
     }
 
@@ -229,25 +254,5 @@ public class BoardService {
         boardRepository.save(board);
     }
 
-    public GetBoardResponseDto getBoard(Integer boardNumber) {
-        Board board = boardRepository.getBoardWithWriter(boardNumber).orElseThrow(
-                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
-        List<Image> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
-        return new GetBoardResponseDto(board, imageList);
-    }
 
-    public void postBoard(PostBoardRequestDto dto, String email) {
-        User user = userService.findByEmail(email);
-        Board board = Board.from(dto, user);
-        boardRepository.save(board);
-
-        List<String> boardImageList = dto.getBoardImageList();
-        List<Image> imageEntities = new ArrayList<>();
-
-        for (String image : boardImageList) {
-            Image imageEntity = Image.from(board, image);
-            imageEntities.add(imageEntity);
-        }
-        imageRepository.saveAll(imageEntities);
-    }
 }

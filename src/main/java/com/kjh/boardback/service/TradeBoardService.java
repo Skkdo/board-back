@@ -11,7 +11,6 @@ import com.kjh.boardback.dto.response.trade_board.GetTradeBoardResponseDto;
 import com.kjh.boardback.dto.response.trade_board.GetTradeCommentListResponseDto;
 import com.kjh.boardback.dto.response.trade_board.GetTradeFavoriteListResponseDto;
 import com.kjh.boardback.dto.response.trade_board.GetUserTradeBoardListResponseDto;
-import com.kjh.boardback.dto.response.trade_board.PutTradeFavoriteResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.trade_board.TradeBoard;
@@ -25,6 +24,7 @@ import com.kjh.boardback.repository.trade_board.TradeBoardRepository;
 import com.kjh.boardback.repository.trade_board.TradeCommentRepository;
 import com.kjh.boardback.repository.trade_board.TradeFavoriteRepository;
 import com.kjh.boardback.repository.trade_board.TradeImageRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,17 +57,37 @@ public class TradeBoardService {
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_COMMENT));
     }
 
-    @Transactional
-    public void postComment(Integer boardNumber, String email, PostTradeCommentRequestDto dto) {
-
+    public GetTradeBoardResponseDto getBoard(Integer boardNumber) {
         TradeBoard board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        List<TradeImage> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
+        return new GetTradeBoardResponseDto(board, imageList);
+    }
 
-        TradeComment comment = TradeComment.from(user, board, dto);
-        commentRepository.save(comment);
+    public GetTop3TradeBoardListResponseDto getTop3BoardList() {
+        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<TradeBoard> boardList = boardRepository.getTop3Within7Days(sevenDaysAgo,pageable);
+        return new GetTop3TradeBoardListResponseDto(boardList);
+    }
 
-        board.increaseCommentCount();
-        boardRepository.save(board);
+    public GetSearchTradeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+
+        List<TradeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
+        SearchLog searchLog = new SearchLog(searchWord, preSearchWord, false);
+        searchLogRepository.save(searchLog);
+
+        boolean relation = preSearchWord != null;
+        if (relation) {
+            searchLog = new SearchLog(preSearchWord, searchWord, relation);
+            searchLogRepository.save(searchLog);
+        }
+        return new GetSearchTradeBoardListResponseDto(boardList);
+    }
+
+    public GetUserTradeBoardListResponseDto getUserBoardList(String email) {
+        userService.findByEmail(email);
+        List<TradeBoard> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
+        return new GetUserTradeBoardListResponseDto(boardList);
     }
 
     public GetLatestTradeBoardListResponseDto getLatestBoardList() {
@@ -76,20 +96,26 @@ public class TradeBoardService {
     }
 
     @Transactional
-    public void deleteBoard(String email, Integer boardNumber) {
+    public void increaseViewCount(Integer boardNumber) {
         TradeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        board.increaseViewCount();
+        boardRepository.save(board);
+    }
 
-        String writerEmail = board.getWriter().getEmail();
-        boolean isWriter = writerEmail.equals(email);
-        if (!isWriter) {
-            throw new BusinessException(ResponseCode.NO_PERMISSION);
+    @Transactional
+    public void postBoard(PostTradeBoardRequestDto dto, String email) {
+        User user = userService.findByEmail(email);
+        TradeBoard board = TradeBoard.from(dto, user);
+        boardRepository.save(board);
+
+        List<String> boardImageList = dto.getBoardImageList();
+        List<TradeImage> imageEntities = new ArrayList<>();
+
+        for (String image : boardImageList) {
+            TradeImage imageEntity = TradeImage.from(board, image);
+            imageEntities.add(imageEntity);
         }
-
-        imageRepository.deleteByBoard_BoardNumber(boardNumber);
-        favoriteRepository.deleteByBoard_BoardNumber(boardNumber);
-        commentRepository.deleteByBoard_BoardNumber(boardNumber);
-        boardRepository.delete(board);
+        imageRepository.saveAll(imageEntities);
     }
 
     @Transactional
@@ -117,33 +143,21 @@ public class TradeBoardService {
     }
 
     @Transactional
-    public void postBoard(PostTradeBoardRequestDto dto, String email) {
-        User user = userService.findByEmail(email);
-        TradeBoard board = TradeBoard.from(dto, user);
-        boardRepository.save(board);
-
-        List<String> boardImageList = dto.getBoardImageList();
-        List<TradeImage> imageEntities = new ArrayList<>();
-
-        for (String image : boardImageList) {
-            TradeImage imageEntity = TradeImage.from(board, image);
-            imageEntities.add(imageEntity);
-        }
-        imageRepository.saveAll(imageEntities);
-    }
-
-    public GetTradeBoardResponseDto getBoard(Integer boardNumber) {
+    public void deleteBoard(String email, Integer boardNumber) {
         TradeBoard board = findByBoardNumber(boardNumber);
-        List<TradeImage> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
-        return new GetTradeBoardResponseDto(board, imageList);
-    }
+        userService.findByEmail(email);
 
-    public GetTradeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
-        findByBoardNumber(boardNumber);
-        List<TradeFavorite> favoriteList = favoriteRepository.getFavoriteList(boardNumber);
-        return new GetTradeFavoriteListResponseDto(favoriteList);
-    }
+        String writerEmail = board.getWriter().getEmail();
+        boolean isWriter = writerEmail.equals(email);
+        if (!isWriter) {
+            throw new BusinessException(ResponseCode.NO_PERMISSION);
+        }
 
+        imageRepository.deleteByBoard_BoardNumber(boardNumber);
+        favoriteRepository.deleteByBoard_BoardNumber(boardNumber);
+        commentRepository.deleteByBoard_BoardNumber(boardNumber);
+        boardRepository.delete(board);
+    }
 
     public GetTradeCommentListResponseDto getCommentList(Integer boardNumber) {
         findByBoardNumber(boardNumber);
@@ -152,36 +166,16 @@ public class TradeBoardService {
     }
 
     @Transactional
-    public void increaseViewCount(Integer boardNumber) {
+    public void postComment(Integer boardNumber, String email, PostTradeCommentRequestDto dto) {
+
         TradeBoard board = findByBoardNumber(boardNumber);
-        board.increaseViewCount();
+        User user = userService.findByEmail(email);
+
+        TradeComment comment = TradeComment.from(user, board, dto);
+        commentRepository.save(comment);
+
+        board.increaseCommentCount();
         boardRepository.save(board);
-    }
-
-    public GetTop3TradeBoardListResponseDto getTop3BoardList() {
-        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
-        List<TradeBoard> boardList = boardRepository.getTop3Within7Days(pageable);
-        return new GetTop3TradeBoardListResponseDto(boardList);
-    }
-
-    public GetSearchTradeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
-
-        List<TradeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
-        SearchLog searchLog = new SearchLog(searchWord, preSearchWord, false);
-        searchLogRepository.save(searchLog);
-
-        boolean relation = preSearchWord != null;
-        if (relation) {
-            searchLog = new SearchLog(preSearchWord, searchWord, relation);
-            searchLogRepository.save(searchLog);
-        }
-        return new GetSearchTradeBoardListResponseDto(boardList);
-    }
-
-    public GetUserTradeBoardListResponseDto getUserBoardList(String email) {
-        userService.findByEmail(email);
-        List<TradeBoard> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
-        return new GetUserTradeBoardListResponseDto(boardList);
     }
 
     @Transactional
@@ -224,6 +218,12 @@ public class TradeBoardService {
 
     }
 
+    public GetTradeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
+        findByBoardNumber(boardNumber);
+        List<TradeFavorite> favoriteList = favoriteRepository.getFavoriteList(boardNumber);
+        return new GetTradeFavoriteListResponseDto(favoriteList);
+    }
+
     @Transactional
     public void putFavorite(String email, Integer boardNumber) {
 
@@ -233,11 +233,11 @@ public class TradeBoardService {
         Optional<TradeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
                 boardNumber, email);
 
-        if(optional.isEmpty()){
+        if (optional.isEmpty()) {
             TradeFavorite favorite = TradeFavorite.from(user, board);
             favoriteRepository.save(favorite);
             board.increaseFavoriteCount();
-        }else{
+        } else {
             favoriteRepository.delete(optional.get());
             board.decreaseFavoriteCount();
         }

@@ -28,6 +28,7 @@ import com.kjh.boardback.repository.recipe_board.RecipeBoardRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeCommentRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeFavoriteRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeImageRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +67,57 @@ public class RecipeBoardService {
         List<RecipeImage> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
 
         return new GetRecipeBoardResponseDto(board, imageList);
+    }
+
+    public GetLatestRecipeBoardListResponseDto getLatestBoardList(int type) {
+        List<RecipeBoard> boardList = boardRepository.getLatestList(type);
+        return new GetLatestRecipeBoardListResponseDto(boardList);
+    }
+
+    public ResponseDto getTop3BoardList(int type) {
+
+        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<RecipeBoard> boardList = boardRepository.getTop3ListWithin7Days(type, sevenDaysAgo, pageable);
+
+        if (type == 0) {
+            return new GetTop3GeneralRecipeBoardListResponseDto(boardList);
+        } else if (type == 1) {
+            return new GetTop3ConvenienceRecipeBoardListResponseDto(boardList);
+        } else {
+            throw new BusinessException(ResponseCode.NOT_EXISTED_BOARD);
+        }
+    }
+
+    public GetSearchRecipeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+
+        List<RecipeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
+
+        SearchLog searchLog = new SearchLog(searchWord, preSearchWord, false);
+        searchLogRepository.save(searchLog);
+
+        boolean relation = preSearchWord != null;
+        if (relation) {
+            searchLog = new SearchLog(preSearchWord, searchWord, relation);
+            searchLogRepository.save(searchLog);
+        }
+
+        return new GetSearchRecipeBoardListResponseDto(boardList);
+    }
+
+    public GetUserRecipeBoardListResponseDto getUserBoardList(String email) {
+
+        userService.findByEmail(email);
+        List<RecipeBoard> boardList = boardRepository.getUserBoardList(email);
+
+        return new GetUserRecipeBoardListResponseDto(boardList);
+    }
+
+    @Transactional
+    public void increaseViewCount(Integer boardNumber) {
+        RecipeBoard board = findByBoardNumber(boardNumber);
+        board.increaseViewCount();
+        boardRepository.save(board);
     }
 
     @Transactional
@@ -113,84 +165,6 @@ public class RecipeBoardService {
         }
     }
 
-    @Transactional
-    public void putFavorite(String email, Integer boardNumber) {
-
-        User user = userService.findByEmail(email);
-        RecipeBoard board = findByBoardNumber(boardNumber);
-
-        Optional<RecipeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
-                boardNumber, email);
-
-        if (optional.isEmpty()) {
-            RecipeFavorite favorite = RecipeFavorite.from(user, board);
-            favoriteRepository.save(favorite);
-            board.increaseFavoriteCount();
-        } else {
-            favoriteRepository.delete(optional.get());
-            board.decreaseFavoriteCount();
-        }
-        boardRepository.save(board);
-    }
-
-    public GetRecipeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
-        findByBoardNumber(boardNumber);
-        List<Favorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
-        return new GetRecipeFavoriteListResponseDto(favoriteList);
-    }
-
-    public GetRecipeCommentListResponseDto getCommentList(Integer boardNumber) {
-        findByBoardNumber(boardNumber);
-        List<RecipeComment> commentList = commentRepository.getCommentListWithUser(boardNumber);
-        return new GetRecipeCommentListResponseDto(commentList);
-    }
-
-    @Transactional
-    public void increaseViewCount(Integer boardNumber) {
-        RecipeBoard board = findByBoardNumber(boardNumber);
-        board.increaseViewCount();
-        boardRepository.save(board);
-    }
-
-    @Transactional
-    public void deleteBoard(Integer boardNumber, String email) {
-
-        RecipeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
-
-        String writerEmail = board.getWriter().getEmail();
-        boolean isWriter = writerEmail.equals(email);
-        if (!isWriter) {
-            throw new BusinessException(ResponseCode.NO_PERMISSION);
-        }
-
-        imageRepository.deleteByBoard_BoardNumber(boardNumber);
-        favoriteRepository.deleteByBoard_BoardNumber(boardNumber);
-        commentRepository.deleteByBoard_BoardNumber(boardNumber);
-        boardRepository.delete(board);
-    }
-
-    @Transactional
-    public void patchBoard(PatchRecipeBoardRequestDto dto, Integer boardNumber, String email) {
-
-        RecipeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
-
-        String writerEmail = board.getWriter().getEmail();
-        boolean isWriter = writerEmail.equals(email);
-        if (!isWriter) {
-            throw new BusinessException(ResponseCode.NO_PERMISSION);
-        }
-
-        board.patch(dto);
-        boardRepository.save(board);
-        imageRepository.deleteByBoard_BoardNumber(boardNumber);
-
-        List<RecipeImage> imageEntities = new ArrayList<>();
-        patchBoardImageList(dto, board, imageEntities);
-        imageRepository.saveAll(imageEntities);
-    }
-
     private static void patchBoardImageList(PatchRecipeBoardRequestDto dto, RecipeBoard board,
                                             List<RecipeImage> imageList) {
         List<String> boardImageList = dto.getBoardImageList();
@@ -224,47 +198,50 @@ public class RecipeBoardService {
         }
     }
 
-    public GetLatestRecipeBoardListResponseDto getLatestBoardList(int type) {
-        List<RecipeBoard> boardList = boardRepository.getLatestList(type);
-        return new GetLatestRecipeBoardListResponseDto(boardList);
-    }
 
-    public ResponseDto getTop3BoardList(int type) {
+    @Transactional
+    public void patchBoard(PatchRecipeBoardRequestDto dto, Integer boardNumber, String email) {
 
-        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
-        List<RecipeBoard> boardList = boardRepository.getTop3ListWithin7Days(type, pageable);
-
-        if (type == 0) {
-            return new GetTop3GeneralRecipeBoardListResponseDto(boardList);
-        } else if (type == 1) {
-            return new GetTop3ConvenienceRecipeBoardListResponseDto(boardList);
-        } else {
-            throw new BusinessException(ResponseCode.NOT_EXISTED_BOARD);
-        }
-    }
-
-    public GetSearchRecipeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
-
-        List<RecipeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
-
-        SearchLog searchLog = new SearchLog(searchWord, preSearchWord, false);
-        searchLogRepository.save(searchLog);
-
-        boolean relation = preSearchWord != null;
-        if (relation) {
-            searchLog = new SearchLog(preSearchWord, searchWord, relation);
-            searchLogRepository.save(searchLog);
-        }
-
-        return new GetSearchRecipeBoardListResponseDto(boardList);
-    }
-
-    public GetUserRecipeBoardListResponseDto getUserBoardList(String email) {
-
+        RecipeBoard board = findByBoardNumber(boardNumber);
         userService.findByEmail(email);
-        List<RecipeBoard> boardList = boardRepository.getUserBoardList(email);
 
-        return new GetUserRecipeBoardListResponseDto(boardList);
+        String writerEmail = board.getWriter().getEmail();
+        boolean isWriter = writerEmail.equals(email);
+        if (!isWriter) {
+            throw new BusinessException(ResponseCode.NO_PERMISSION);
+        }
+
+        board.patch(dto);
+        boardRepository.save(board);
+        imageRepository.deleteByBoard_BoardNumber(boardNumber);
+
+        List<RecipeImage> imageEntities = new ArrayList<>();
+        patchBoardImageList(dto, board, imageEntities);
+        imageRepository.saveAll(imageEntities);
+    }
+
+    @Transactional
+    public void deleteBoard(Integer boardNumber, String email) {
+
+        RecipeBoard board = findByBoardNumber(boardNumber);
+        userService.findByEmail(email);
+
+        String writerEmail = board.getWriter().getEmail();
+        boolean isWriter = writerEmail.equals(email);
+        if (!isWriter) {
+            throw new BusinessException(ResponseCode.NO_PERMISSION);
+        }
+
+        imageRepository.deleteByBoard_BoardNumber(boardNumber);
+        favoriteRepository.deleteByBoard_BoardNumber(boardNumber);
+        commentRepository.deleteByBoard_BoardNumber(boardNumber);
+        boardRepository.delete(board);
+    }
+
+    public GetRecipeCommentListResponseDto getCommentList(Integer boardNumber) {
+        findByBoardNumber(boardNumber);
+        List<RecipeComment> commentList = commentRepository.getCommentListWithUser(boardNumber);
+        return new GetRecipeCommentListResponseDto(commentList);
     }
 
     @Transactional
@@ -316,6 +293,32 @@ public class RecipeBoardService {
 
         commentRepository.delete(comment);
         board.decreaseCommentCount();
+        boardRepository.save(board);
+    }
+
+    public GetRecipeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
+        findByBoardNumber(boardNumber);
+        List<Favorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
+        return new GetRecipeFavoriteListResponseDto(favoriteList);
+    }
+
+    @Transactional
+    public void putFavorite(String email, Integer boardNumber) {
+
+        User user = userService.findByEmail(email);
+        RecipeBoard board = findByBoardNumber(boardNumber);
+
+        Optional<RecipeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
+                boardNumber, email);
+
+        if (optional.isEmpty()) {
+            RecipeFavorite favorite = RecipeFavorite.from(user, board);
+            favoriteRepository.save(favorite);
+            board.increaseFavoriteCount();
+        } else {
+            favoriteRepository.delete(optional.get());
+            board.decreaseFavoriteCount();
+        }
         boardRepository.save(board);
     }
 }

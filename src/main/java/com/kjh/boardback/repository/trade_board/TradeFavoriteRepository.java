@@ -14,7 +14,7 @@ public interface TradeFavoriteRepository extends JpaRepository<TradeFavorite, Tr
 
     @Query("SELECT f FROM TradeFavorite f "+
             "JOIN FETCH f.user "+
-            "WHERE f.board.boardNumber = :boardNUmber ")
+            "WHERE f.board.boardNumber = :boardNumber ")
     List<TradeFavorite> getFavoriteList(@Param("boardNumber") Integer boardNumber);
 
 

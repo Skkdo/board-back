@@ -1,12 +1,13 @@
 package com.kjh.boardback.repository.recipe_board;
 
 import com.kjh.boardback.entity.recipe_board.RecipeBoard;
-import io.lettuce.core.dynamic.annotation.Param;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -22,9 +23,10 @@ public interface RecipeBoardRepository extends JpaRepository<RecipeBoard, Intege
 
     @Query("SELECT b FROM RecipeBoard b " +
             "JOIN FETCH b.writer " +
-            "WHERE (b.type = :type AND b.createdAt >= CURRENT_DATE - 7) " +
+            "WHERE (b.type = :type AND b.createdAt >= :sevenDaysAgo) " +
             "ORDER BY b.viewCount DESC, b.favoriteCount DESC")
-    List<RecipeBoard> getTop3ListWithin7Days(@Param("type") int type, Pageable pageable);
+    List<RecipeBoard> getTop3ListWithin7Days(@Param("type") int type, @Param("sevenDaysAgo") LocalDateTime sevenDaysAgo,
+                                             Pageable pageable);
 
     @Query("SELECT b FROM RecipeBoard b " +
             "JOIN FETCH b.writer " +
@@ -32,9 +34,9 @@ public interface RecipeBoardRepository extends JpaRepository<RecipeBoard, Intege
             "ORDER BY b.createdAt DESC ")
     List<RecipeBoard> getBySearchWord(@Param("title") String title, @Param("content") String content);
 
-    @Query("SELECT b FROM RecipeBoard b "+
-            "JOIN FETCH b.writer "+
-            "WHERE b.writer.email = :email "+
+    @Query("SELECT b FROM RecipeBoard b " +
+            "JOIN FETCH b.writer " +
+            "WHERE b.writer.email = :email " +
             "ORDER BY b.createdAt DESC ")
-    List<RecipeBoard> getUserBoardList(@Param("email")String email);
+    List<RecipeBoard> getUserBoardList(@Param("email") String email);
 }
