@@ -1,5 +1,8 @@
 package com.kjh.boardback.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -74,11 +77,18 @@ class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException authException) throws IOException, ServletException {
+            AuthenticationException authException) throws IOException {
+
+        ResponseDto responseDto = new ResponseDto(ResponseCode.AUTHORIZATION_FAIL);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(responseDto);
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("{ \"code\" : \"AF\", \"message\" : \"Authorization Failed\"}");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonResponse);
+
     }
 
 }
