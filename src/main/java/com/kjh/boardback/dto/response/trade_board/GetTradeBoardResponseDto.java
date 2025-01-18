@@ -1,16 +1,12 @@
 package com.kjh.boardback.dto.response.trade_board;
 
-import com.kjh.boardback.common.ResponseCode;
-import com.kjh.boardback.common.ResponseMessage;
-import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.entity.trade_board.TradeImageEntity;
-import com.kjh.boardback.repository.resultSet.GetTradeBoardResultSet;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
+import com.kjh.boardback.entity.trade_board.TradeBoard;
+import com.kjh.boardback.entity.trade_board.TradeImage;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 
 @Getter
 public class GetTradeBoardResponseDto extends ResponseDto {
@@ -26,36 +22,25 @@ public class GetTradeBoardResponseDto extends ResponseDto {
     private final String writerNickname;
     private final String writerProfileImage;
 
-    private GetTradeBoardResponseDto(GetTradeBoardResultSet resultSet, List<TradeImageEntity> imageEntities) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
+    public GetTradeBoardResponseDto(TradeBoard board, List<TradeImage> imageList) {
+        super(ResponseCode.SUCCESS);
 
         List<String> boardImageList = new ArrayList<>();
-        for (TradeImageEntity imageEntity : imageEntities) {
+        for (TradeImage imageEntity : imageList) {
             String boardImage = imageEntity.getImage();
             boardImageList.add(boardImage);
         }
 
-        this.boardNumber = resultSet.getBoardNumber();
-        this.title = resultSet.getTitle();
-        this.content = resultSet.getContent();
+        this.boardNumber = board.getBoardNumber();
+        this.title = board.getTitle();
+        this.content = board.getContent();
         this.boardImageList = boardImageList;
-        this.writeDatetime = resultSet.getWriteDatetime();
-        this.writerEmail = resultSet.getWriterEmail();
-        this.tradeLocation = resultSet.getTradeLocation();
-        this.price = resultSet.getPrice();
-        this.writerNickname = resultSet.getWriterNickname();
-        this.writerProfileImage = resultSet.getWriterProfileImage();
+        this.writeDatetime = board.getCreatedAt().toString();
+        this.writerEmail = board.getWriter().getEmail();
+        this.tradeLocation = board.getTradeLocation();
+        this.price = board.getPrice();
+        this.writerNickname = board.getWriter().getNickname();
+        this.writerProfileImage = board.getWriter().getProfileImage();
     }
-
-    public static ResponseEntity<GetTradeBoardResponseDto> success(GetTradeBoardResultSet resultSet, List<TradeImageEntity> imageEntities) {
-        GetTradeBoardResponseDto result = new GetTradeBoardResponseDto(resultSet, imageEntities);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
-
-    public static ResponseEntity<ResponseDto> noExistBoard() {
-        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXISTED_BOARD, ResponseMessage.NOT_EXISTED_BOARD);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-    }
-
 
 }

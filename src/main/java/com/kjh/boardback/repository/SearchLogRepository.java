@@ -1,39 +1,24 @@
 package com.kjh.boardback.repository;
 
-import com.kjh.boardback.repository.resultSet.GetPopularListResultSet;
-import com.kjh.boardback.repository.resultSet.GetRelationListResultSet;
+import com.kjh.boardback.entity.SearchLog;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.kjh.boardback.entity.SearchLogEntity;
-
-import java.util.List;
-
 @Repository
-public interface SearchLogRepository extends JpaRepository<SearchLogEntity, Integer>{
+public interface SearchLogRepository extends JpaRepository<SearchLog, Integer> {
 
-    @Query(value =
-            "SELECT search_word AS searchWord, count(search_word) AS count "+
-            "FROM search_log "+
-            "WHERE relation IS FALSE "+
-            "GROUP BY search_word "+
-            "ORDER BY count DESC "+
-            "LIMIT 15 ",
-            nativeQuery = true
-    )
-    List<GetPopularListResultSet> getPopularList();
+    @Query("SELECT l FROM SearchLog l " +
+            "WHERE l.relation = false " +
+            "GROUP BY l.searchWord " +
+            "ORDER BY COUNT(l.searchWord) DESC ")
+    List<SearchLog> getPopularList();
 
-    @Query(value =
-            "SELECT relation_word AS searchWord, count(relation_word) AS count "+
-                    "FROM search_log "+
-                    "WHERE search_word = ?1 "+
-                    "AND relation_word IS NOT NULL "+
-                    "GROUP BY relation_word "+
-                    "ORDER BY count DESC "+
-                    "LIMIT 15 ",
-            nativeQuery = true
-    )
-    List<GetRelationListResultSet> getRelationList(String SearchWord);
-    
+    @Query("SELECT DISTINCT l.relationWord FROM SearchLog l " +
+            "WHERE (l.searchWord = :searchWord AND l.relationWord IS NOT NULL) " +
+            "GROUP BY l.relationWord " +
+            "ORDER BY COUNT(l.relationWord) DESC")
+    List<String> getRelationList(@Param("searchWord") String SearchWord);
 }

@@ -1,35 +1,24 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.repository.resultSet.GetFavoriteListResultSet;
-import com.kjh.boardback.repository.resultSet.GetTradeFavoriteListResultSet;
+import com.kjh.boardback.entity.trade_board.TradeFavorite;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-
 public class TradeFavoriteListItem {
     private String email;
     private String nickname;
     private String profileImage;
 
-    public TradeFavoriteListItem(GetTradeFavoriteListResultSet resultSet) {
-        this.email = resultSet.getEmail();
-        this.nickname = resultSet.getNickname();
-        this.profileImage = resultSet.getProfileImage();
+    public TradeFavoriteListItem(TradeFavorite favorite) {
+        this.email = favorite.getUser().getEmail();
+        this.nickname = favorite.getUser().getNickname();
+        this.profileImage = favorite.getUser().getProfileImage();
     }
 
-    public static List<TradeFavoriteListItem> copyList(List<GetTradeFavoriteListResultSet> resultSets){
-        List<TradeFavoriteListItem> list = new ArrayList<>();
-        for(GetTradeFavoriteListResultSet resultSet : resultSets){
-            TradeFavoriteListItem favoriteListItem = new TradeFavoriteListItem(resultSet);
-            list.add(favoriteListItem);
-        }
-        return list;
+    public static List<TradeFavoriteListItem> getList(List<TradeFavorite> favoriteList) {
+        return favoriteList.stream().map(TradeFavoriteListItem::new).toList();
     }
 }

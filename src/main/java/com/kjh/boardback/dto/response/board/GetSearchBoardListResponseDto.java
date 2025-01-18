@@ -1,28 +1,20 @@
 package com.kjh.boardback.dto.response.board;
 
-import com.kjh.boardback.common.ResponseCode;
-import com.kjh.boardback.common.ResponseMessage;
 import com.kjh.boardback.dto.object.BoardListItem;
-import com.kjh.boardback.dto.response.ResponseDto;
-import com.kjh.boardback.entity.board.BoardListViewEntity;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
+import com.kjh.boardback.entity.board.Board;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.common.ResponseDto;
 import java.util.List;
+import lombok.Getter;
 
 @Getter
 public class GetSearchBoardListResponseDto extends ResponseDto {
 
     private List<BoardListItem> searchList;
 
-    private GetSearchBoardListResponseDto(List<BoardListViewEntity> boardListViewEntities) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-        this.searchList = BoardListItem.getList(boardListViewEntities);
+    public GetSearchBoardListResponseDto(List<Board> boardList) {
+        super(ResponseCode.SUCCESS);
+        this.searchList = BoardListItem.getList(boardList);
     }
 
-    public static ResponseEntity<GetSearchBoardListResponseDto> success(List<BoardListViewEntity> boardListViewEntities){
-        GetSearchBoardListResponseDto result = new GetSearchBoardListResponseDto(boardListViewEntities);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
 }

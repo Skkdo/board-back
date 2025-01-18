@@ -1,32 +1,42 @@
 package com.kjh.boardback.repository.board;
 
-import com.kjh.boardback.entity.board.BoardEntity;
-import com.kjh.boardback.repository.resultSet.GetBoardResultSet;
+import com.kjh.boardback.entity.board.Board;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
+public interface BoardRepository extends JpaRepository<Board, Integer> {
 
-    @Query(
-            value =
-                    "SELECT " +
-                            "B.board_number AS boardNumber, " +
-                            "B.title AS title, " +
-                            "B.content AS content, " +
-                            "B.write_datetime AS writeDatetime, " +
-                            "B.writer_email AS writerEmail, " +
-                            "U.nickname AS writerNickname, " +
-                            "U.profile_image AS writerProfileImage " +
-                            "FROM board AS B " +
-                            "INNER JOIN `user` AS U ON B.writer_email = U.email " +
-                            "WHERE board_number = ?1 ",
-            nativeQuery = true
-    )
-    GetBoardResultSet getBoard(Integer boardNumber);
+    Optional<Board> findByBoardNumber(Integer boardNumber);
 
-    BoardEntity findByBoardNumber(Integer boardNumber);
+    List<Board> findByWriter_EmailOrderByCreatedAtDesc(String writerEmail);
 
-    Boolean existsByBoardNumber(Integer boardNumber);
+    @Query("SELECT b FROM Board b " +
+            "JOIN FETCH b.writer " +
+            "WHERE (b.title LIKE %:title% OR b.content LIKE %:content%) " +
+            "ORDER BY b.createdAt DESC")
+    List<Board> getBySearchWord(@Param("title") String title, @Param("content") String content);
+
+    @Query("SELECT b FROM Board b " +
+            "JOIN FETCH b.writer " +
+            "WHERE b.createdAt >= :sevenDaysAgo " +
+            "ORDER BY b.viewCount DESC, b.favoriteCount DESC")
+    List<Board> getTop3Within7Days(@Param("sevenDaysAgo")LocalDateTime sevenDaysAgo, Pageable pageable);
+
+    @Query("SELECT b FROM Board b " +
+            "JOIN FETCH b.writer " +
+            "ORDER BY b.createdAt DESC")
+    List<Board> getLatestBoardList();
+
+    @Query("SELECT b FROM Board b " +
+            "JOIN FETCH b.writer " +
+            "WHERE b.boardNumber = :boardNumber")
+    Optional<Board> getBoardWithWriter(@Param("boardNumber") Integer boardNumber);
+
 }
