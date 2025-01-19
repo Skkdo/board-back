@@ -107,7 +107,7 @@ public class RecipeBoardService {
 
     public GetUserRecipeBoardListResponseDto getUserBoardList(String email) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         List<RecipeBoard> boardList = boardRepository.getUserBoardList(email);
 
         return new GetUserRecipeBoardListResponseDto(boardList);
@@ -123,7 +123,7 @@ public class RecipeBoardService {
     @Transactional
     public void postBoard(PostRecipeBoardRequestDto dto, String email) {
 
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         RecipeBoard board = RecipeBoard.from(dto, user);
         boardRepository.save(board);
 
@@ -203,7 +203,7 @@ public class RecipeBoardService {
     public void patchBoard(PatchRecipeBoardRequestDto dto, Integer boardNumber, String email) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -224,7 +224,7 @@ public class RecipeBoardService {
     public void deleteBoard(Integer boardNumber, String email) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -248,7 +248,7 @@ public class RecipeBoardService {
     public void postComment(Integer boardNumber, String email, PostRecipeCommentRequestDto dto) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         RecipeComment comment = RecipeComment.from(board, user, dto);
         commentRepository.save(comment);
@@ -260,7 +260,7 @@ public class RecipeBoardService {
     @Transactional
     public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);
         RecipeComment comment = findByCommentNumber(commentNumber);
 
@@ -277,7 +277,7 @@ public class RecipeBoardService {
     @Transactional
     public void deleteComment(Integer boardNumber, Integer commentNumber, String email) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         RecipeBoard board = findByBoardNumber(boardNumber);
         RecipeComment comment = findByCommentNumber(commentNumber);
 
@@ -305,7 +305,7 @@ public class RecipeBoardService {
     @Transactional
     public void putFavorite(String email, Integer boardNumber) {
 
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         RecipeBoard board = findByBoardNumber(boardNumber);
 
         Optional<RecipeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(

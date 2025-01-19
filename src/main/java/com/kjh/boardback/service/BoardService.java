@@ -65,7 +65,7 @@ public class BoardService {
     }
 
     public GetUserBoardListResponseDto getUserBoardList(String email) {
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         List<Board> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
         return new GetUserBoardListResponseDto(boardList, user);
     }
@@ -109,7 +109,7 @@ public class BoardService {
 
     @Transactional
     public void postBoard(PostBoardRequestDto dto, String email) {
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         Board board = Board.from(dto, user);
         boardRepository.save(board);
 
@@ -127,7 +127,7 @@ public class BoardService {
     public void patchBoard(PatchBoardRequestDto dto, Integer boardNumber, String email) {
 
         Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -152,7 +152,7 @@ public class BoardService {
     public void deleteBoard(Integer boardNumber, String email) {
 
         Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -177,7 +177,7 @@ public class BoardService {
     @Transactional
     public void postComment(Integer boardNumber, String email, PostCommentRequestDto dto) {
         Board board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         Comment comment = new Comment(board, user, dto);
         commentRepository.save(comment);
@@ -189,7 +189,7 @@ public class BoardService {
     @Transactional
     public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);
 
         Comment comment = findByCommentNumber(commentNumber);
@@ -207,7 +207,7 @@ public class BoardService {
     public void deleteComment(Integer boardNumber, String email, Integer commentNumber) {
 
         Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         Comment comment = findByCommentNumber(commentNumber);
 
         String writerEmail = board.getWriter().getEmail();
@@ -236,7 +236,7 @@ public class BoardService {
     public void putFavorite(String email, Integer boardNumber) {
 
         Board board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         Optional<Favorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
                 boardNumber, email);

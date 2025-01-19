@@ -85,7 +85,7 @@ public class TradeBoardService {
     }
 
     public GetUserTradeBoardListResponseDto getUserBoardList(String email) {
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         List<TradeBoard> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
         return new GetUserTradeBoardListResponseDto(boardList);
     }
@@ -104,7 +104,7 @@ public class TradeBoardService {
 
     @Transactional
     public void postBoard(PostTradeBoardRequestDto dto, String email) {
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         TradeBoard board = TradeBoard.from(dto, user);
         boardRepository.save(board);
 
@@ -121,7 +121,7 @@ public class TradeBoardService {
     @Transactional
     public void patchBoard(PatchTradeBoardRequestDto dto, String email, Integer boardNumber) {
         TradeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -145,7 +145,7 @@ public class TradeBoardService {
     @Transactional
     public void deleteBoard(String email, Integer boardNumber) {
         TradeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -169,7 +169,7 @@ public class TradeBoardService {
     public void postComment(Integer boardNumber, String email, PostTradeCommentRequestDto dto) {
 
         TradeBoard board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         TradeComment comment = TradeComment.from(user, board, dto);
         commentRepository.save(comment);
@@ -182,7 +182,7 @@ public class TradeBoardService {
     public void patchComment(Integer boardNumber, Integer commentNumber, String email,
                              PatchTradeCommentRequestDto dto) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);
         TradeComment comment = findByCommentNumber(commentNumber);
 
@@ -199,7 +199,7 @@ public class TradeBoardService {
     @Transactional
     public void deleteComment(Integer boardNumber, Integer commentNumber, String email) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         TradeBoard board = findByBoardNumber(boardNumber);
         TradeComment comment = findByCommentNumber(commentNumber);
 
@@ -227,7 +227,7 @@ public class TradeBoardService {
     @Transactional
     public void putFavorite(String email, Integer boardNumber) {
 
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         TradeBoard board = findByBoardNumber(boardNumber);
 
         Optional<TradeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
