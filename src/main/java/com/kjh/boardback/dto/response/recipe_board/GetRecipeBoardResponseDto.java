@@ -2,14 +2,12 @@ package com.kjh.boardback.dto.response.recipe_board;
 
 import com.kjh.boardback.entity.recipe_board.RecipeBoard;
 import com.kjh.boardback.entity.recipe_board.RecipeImage;
-import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class GetRecipeBoardResponseDto extends ResponseDto {
+public class GetRecipeBoardResponseDto {
 
     private int boardNumber;
     private String title;
@@ -40,7 +38,6 @@ public class GetRecipeBoardResponseDto extends ResponseDto {
 
 
     public GetRecipeBoardResponseDto(RecipeBoard board, List<RecipeImage> imageList) {
-        super(ResponseCode.SUCCESS);
 
         List<String> boardImageList = new ArrayList<>();
 

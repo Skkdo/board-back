@@ -4,7 +4,6 @@ import com.kjh.boardback.dto.request.user.PatchNicknameRequestDto;
 import com.kjh.boardback.dto.request.user.PatchProfileImageRequestDto;
 import com.kjh.boardback.dto.response.user.GetSignInUserResponseDto;
 import com.kjh.boardback.dto.response.user.GetUserResponseDto;
-import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.common.ResponseDto;
 import com.kjh.boardback.service.UserService;
 import jakarta.validation.Valid;
@@ -47,7 +46,7 @@ public class UserController {
             @AuthenticationPrincipal String email
     ) {
         userService.patchNickname(email, requestBody);
-        return ResponseEntity.ok(new ResponseDto(ResponseCode.SUCCESS));
+        return ResponseEntity.ok(ResponseDto.success());
     }
 
     @PatchMapping("/profile-image")
@@ -56,7 +55,7 @@ public class UserController {
             @AuthenticationPrincipal String email
     ) {
         userService.patchProfileImage(email, requestBody);
-        return ResponseEntity.ok(new ResponseDto(ResponseCode.SUCCESS));
+        return ResponseEntity.ok(ResponseDto.success());
     }
 
 }

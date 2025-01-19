@@ -4,13 +4,10 @@ import com.kjh.boardback.dto.request.trade_board.PatchTradeBoardRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PatchTradeCommentRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PostTradeBoardRequestDto;
 import com.kjh.boardback.dto.request.trade_board.PostTradeCommentRequestDto;
-import com.kjh.boardback.dto.response.trade_board.GetLatestTradeBoardListResponseDto;
-import com.kjh.boardback.dto.response.trade_board.GetSearchTradeBoardListResponseDto;
-import com.kjh.boardback.dto.response.trade_board.GetTop3TradeBoardListResponseDto;
+import com.kjh.boardback.dto.response.trade_board.GetTradeBoardListResponseDto;
 import com.kjh.boardback.dto.response.trade_board.GetTradeBoardResponseDto;
 import com.kjh.boardback.dto.response.trade_board.GetTradeCommentListResponseDto;
 import com.kjh.boardback.dto.response.trade_board.GetTradeFavoriteListResponseDto;
-import com.kjh.boardback.dto.response.trade_board.GetUserTradeBoardListResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.trade_board.TradeBoard;
@@ -63,14 +60,14 @@ public class TradeBoardService {
         return new GetTradeBoardResponseDto(board, imageList);
     }
 
-    public GetTop3TradeBoardListResponseDto getTop3BoardList() {
+    public GetTradeBoardListResponseDto getTop3BoardList() {
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<TradeBoard> boardList = boardRepository.getTop3Within7Days(sevenDaysAgo,pageable);
-        return new GetTop3TradeBoardListResponseDto(boardList);
+        List<TradeBoard> boardList = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
+        return new GetTradeBoardListResponseDto(boardList);
     }
 
-    public GetSearchTradeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+    public GetTradeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
 
         List<TradeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
         SearchLog searchLog = new SearchLog(searchWord, preSearchWord, false);
@@ -81,18 +78,18 @@ public class TradeBoardService {
             searchLog = new SearchLog(preSearchWord, searchWord, relation);
             searchLogRepository.save(searchLog);
         }
-        return new GetSearchTradeBoardListResponseDto(boardList);
+        return new GetTradeBoardListResponseDto(boardList);
     }
 
-    public GetUserTradeBoardListResponseDto getUserBoardList(String email) {
+    public GetTradeBoardListResponseDto getUserBoardList(String email) {
         userService.findByEmailOrElseThrow(email);
         List<TradeBoard> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
-        return new GetUserTradeBoardListResponseDto(boardList);
+        return new GetTradeBoardListResponseDto(boardList);
     }
 
-    public GetLatestTradeBoardListResponseDto getLatestBoardList() {
+    public GetTradeBoardListResponseDto getLatestBoardList() {
         List<TradeBoard> latestList = boardRepository.getLatestBoardList();
-        return new GetLatestTradeBoardListResponseDto(latestList);
+        return new GetTradeBoardListResponseDto(latestList);
     }
 
     @Transactional

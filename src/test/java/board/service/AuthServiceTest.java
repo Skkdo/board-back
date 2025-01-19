@@ -92,8 +92,8 @@ public class AuthServiceTest {
 
         BusinessException exception = assertThrows(BusinessException.class, () -> authService.signUp(dto));
 
-        assertThat(exception.getResponseCode().getCode()).isEqualTo(ResponseCode.DUPLICATE_EMAIL.getCode());
-        assertThat(exception.getResponseCode().getMessage()).isEqualTo(ResponseCode.DUPLICATE_EMAIL.getMessage());
+        assertThat(exception.getCode()).isEqualTo(ResponseCode.DUPLICATE_EMAIL.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ResponseCode.DUPLICATE_EMAIL.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
         verify(userService,never()).findByNicknameOrElseThrow(dto.getNickname());
@@ -113,8 +113,8 @@ public class AuthServiceTest {
         doThrow(new BusinessException(ResponseCode.DUPLICATE_NICKNAME)).when(userService).findByNicknameOrElseThrow(dto.getNickname());
         BusinessException exception = assertThrows(BusinessException.class, () -> authService.signUp(dto));
 
-        assertThat(exception.getResponseCode().getCode()).isEqualTo(ResponseCode.DUPLICATE_NICKNAME.getCode());
-        assertThat(exception.getResponseCode().getMessage()).isEqualTo(ResponseCode.DUPLICATE_NICKNAME.getMessage());
+        assertThat(exception.getCode()).isEqualTo(ResponseCode.DUPLICATE_NICKNAME.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ResponseCode.DUPLICATE_NICKNAME.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
         verify(userService,times(1)).findByNicknameOrElseThrow(dto.getNickname());
@@ -135,8 +135,8 @@ public class AuthServiceTest {
         doThrow(new BusinessException(ResponseCode.DUPLICATE_TEL_NUMBER)).when(userService).findByTelNumberOrElseThrow(dto.getTelNumber());
         BusinessException exception = assertThrows(BusinessException.class, () -> authService.signUp(dto));
 
-        assertThat(exception.getResponseCode().getCode()).isEqualTo(ResponseCode.DUPLICATE_TEL_NUMBER.getCode());
-        assertThat(exception.getResponseCode().getMessage()).isEqualTo(ResponseCode.DUPLICATE_TEL_NUMBER.getMessage());
+        assertThat(exception.getCode()).isEqualTo(ResponseCode.DUPLICATE_TEL_NUMBER.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ResponseCode.DUPLICATE_TEL_NUMBER.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
         verify(userService,times(1)).findByNicknameOrElseThrow(dto.getNickname());
@@ -158,10 +158,7 @@ public class AuthServiceTest {
 
         SignInResponseDto response = authService.signIn(dto);
 
-        assertThat(response.getCode()).isEqualTo(ResponseCode.SUCCESS.getCode());
-        assertThat(response.getMessage()).isEqualTo(ResponseCode.SUCCESS.getMessage());
         assertThat(response.getToken()).isEqualTo(jwtToken);
-
         verify(userService,times(1)).findByEmail(dto.getEmail());
         verify(jwtProvider,times(1)).create(dto.getEmail());
     }
@@ -177,8 +174,8 @@ public class AuthServiceTest {
 
         BusinessException exception = assertThrows(BusinessException.class, () -> authService.signIn(dto));
 
-        assertThat(exception.getResponseCode().getCode()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getCode());
-        assertThat(exception.getResponseCode().getMessage()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getMessage());
+        assertThat(exception.getCode()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
         verify(jwtProvider,never()).create(dto.getEmail());
@@ -195,8 +192,8 @@ public class AuthServiceTest {
 
         BusinessException exception = assertThrows(BusinessException.class, () -> authService.signIn(dto));
 
-        assertThat(exception.getResponseCode().getCode()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getCode());
-        assertThat(exception.getResponseCode().getMessage()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getMessage());
+        assertThat(exception.getCode()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
         verify(jwtProvider,never()).create(dto.getEmail());

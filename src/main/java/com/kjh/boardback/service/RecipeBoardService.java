@@ -5,14 +5,10 @@ import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
-import com.kjh.boardback.dto.response.recipe_board.GetLatestRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardListResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeCommentListResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeFavoriteListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetSearchRecipeBoardListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetTop3ConvenienceRecipeBoardListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetTop3GeneralRecipeBoardListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetUserRecipeBoardListResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.board.Favorite;
@@ -21,7 +17,6 @@ import com.kjh.boardback.entity.recipe_board.RecipeComment;
 import com.kjh.boardback.entity.recipe_board.RecipeFavorite;
 import com.kjh.boardback.entity.recipe_board.RecipeImage;
 import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
 import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeBoardRepository;
@@ -69,27 +64,25 @@ public class RecipeBoardService {
         return new GetRecipeBoardResponseDto(board, imageList);
     }
 
-    public GetLatestRecipeBoardListResponseDto getLatestBoardList(int type) {
+    public GetRecipeBoardListResponseDto getLatestBoardList(int type) {
         List<RecipeBoard> boardList = boardRepository.getLatestList(type);
-        return new GetLatestRecipeBoardListResponseDto(boardList);
+        return new GetRecipeBoardListResponseDto(boardList);
     }
 
-    public ResponseDto getTop3BoardList(int type) {
+    public GetRecipeBoardListResponseDto getTop3BoardList(int type) {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         List<RecipeBoard> boardList = boardRepository.getTop3ListWithin7Days(type, sevenDaysAgo, pageable);
 
-        if (type == 0) {
-            return new GetTop3GeneralRecipeBoardListResponseDto(boardList);
-        } else if (type == 1) {
-            return new GetTop3ConvenienceRecipeBoardListResponseDto(boardList);
+        if (type == 0 || type == 1) {
+            return new GetRecipeBoardListResponseDto(boardList);
         } else {
             throw new BusinessException(ResponseCode.NOT_EXISTED_BOARD);
         }
     }
 
-    public GetSearchRecipeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+    public GetRecipeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
 
         List<RecipeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
 
@@ -102,15 +95,15 @@ public class RecipeBoardService {
             searchLogRepository.save(searchLog);
         }
 
-        return new GetSearchRecipeBoardListResponseDto(boardList);
+        return new GetRecipeBoardListResponseDto(boardList);
     }
 
-    public GetUserRecipeBoardListResponseDto getUserBoardList(String email) {
+    public GetRecipeBoardListResponseDto getUserBoardList(String email) {
 
         userService.findByEmailOrElseThrow(email);
         List<RecipeBoard> boardList = boardRepository.getUserBoardList(email);
 
-        return new GetUserRecipeBoardListResponseDto(boardList);
+        return new GetRecipeBoardListResponseDto(boardList);
     }
 
     @Transactional

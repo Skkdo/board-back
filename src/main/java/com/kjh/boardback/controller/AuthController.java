@@ -27,15 +27,15 @@ public class AuthController {
             @RequestBody @Valid SignUpRequestDto requestBody
     ) {
         authService.signUp(requestBody);
-        return ResponseEntity.ok().body(new ResponseDto(ResponseCode.SUCCESS));
+        return ResponseEntity.ok().body(ResponseDto.success());
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<SignInResponseDto> signIn(
+    public ResponseEntity<ResponseDto> signIn(
             @RequestBody @Valid SignInRequestDto requestBody
     ) {
         SignInResponseDto response = authService.signIn(requestBody);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ResponseDto.success(response));
     }
 
 

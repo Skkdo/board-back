@@ -4,13 +4,10 @@ import com.kjh.boardback.dto.request.board.PatchBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
+import com.kjh.boardback.dto.response.board.GetBoardListResponseDto;
 import com.kjh.boardback.dto.response.board.GetBoardResponseDto;
 import com.kjh.boardback.dto.response.board.GetCommentListResponseDto;
 import com.kjh.boardback.dto.response.board.GetFavoriteListResponseDto;
-import com.kjh.boardback.dto.response.board.GetLatestBoardListResponseDto;
-import com.kjh.boardback.dto.response.board.GetSearchBoardListResponseDto;
-import com.kjh.boardback.dto.response.board.GetTop3BoardListResponseDto;
-import com.kjh.boardback.dto.response.board.GetUserBoardListResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.board.Board;
@@ -64,13 +61,13 @@ public class BoardService {
         return new GetBoardResponseDto(board, imageList);
     }
 
-    public GetUserBoardListResponseDto getUserBoardList(String email) {
+    public GetBoardListResponseDto getUserBoardList(String email) {
         User user = userService.findByEmailOrElseThrow(email);
         List<Board> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
-        return new GetUserBoardListResponseDto(boardList, user);
+        return new GetBoardListResponseDto(boardList, user);
     }
 
-    public GetSearchBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+    public GetBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
 
         List<Board> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
 
@@ -83,21 +80,21 @@ public class BoardService {
             searchLogRepository.save(searchLog);
         }
 
-        return new GetSearchBoardListResponseDto(boardList);
+        return new GetBoardListResponseDto(boardList);
     }
 
-    public GetTop3BoardListResponseDto getTop3BoardList() {
+    public GetBoardListResponseDto getTop3BoardList() {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo,pageable);
+        List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
 
-        return new GetTop3BoardListResponseDto(top3List);
+        return new GetBoardListResponseDto(top3List);
     }
 
-    public GetLatestBoardListResponseDto getLatestBoardList() {
+    public GetBoardListResponseDto getLatestBoardList() {
         List<Board> latestBoardList = boardRepository.getLatestBoardList();
-        return new GetLatestBoardListResponseDto(latestBoardList);
+        return new GetBoardListResponseDto(latestBoardList);
     }
 
     @Transactional

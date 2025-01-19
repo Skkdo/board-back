@@ -2,14 +2,12 @@ package com.kjh.boardback.dto.response.trade_board;
 
 import com.kjh.boardback.entity.trade_board.TradeBoard;
 import com.kjh.boardback.entity.trade_board.TradeImage;
-import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class GetTradeBoardResponseDto extends ResponseDto {
+public class GetTradeBoardResponseDto {
 
     private final int boardNumber;
     private final String title;
@@ -23,7 +21,6 @@ public class GetTradeBoardResponseDto extends ResponseDto {
     private final String writerProfileImage;
 
     public GetTradeBoardResponseDto(TradeBoard board, List<TradeImage> imageList) {
-        super(ResponseCode.SUCCESS);
 
         List<String> boardImageList = new ArrayList<>();
         for (TradeImage imageEntity : imageList) {
