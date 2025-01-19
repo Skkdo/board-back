@@ -1,5 +1,6 @@
 package com.kjh.boardback.dto.response.auth;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SignInResponseDto {
 
     private String token;

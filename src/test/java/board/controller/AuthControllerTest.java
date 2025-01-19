@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -163,7 +162,7 @@ public class AuthControllerTest {
 
         doThrow(new BusinessException(ResponseCode.SIGN_IN_FAIL)).when(authService).signIn(any(SignInRequestDto.class));
 
-        perform(url,HttpStatus.UNAUTHORIZED.value(),requestDto,responseDto);
+        perform(url, HttpStatus.UNAUTHORIZED.value(), requestDto, responseDto);
     }
 
     SignUpRequestDto validSignUpRequestDto() {

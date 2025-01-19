@@ -2,6 +2,7 @@ package com.kjh.boardback.controller;
 
 import com.kjh.boardback.dto.response.search.GetPopularListResponseDto;
 import com.kjh.boardback.dto.response.search.GetRelationListResponseDto;
+import com.kjh.boardback.global.common.ResponseDto;
 import com.kjh.boardback.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +19,17 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/popular-list")
-    public ResponseEntity<GetPopularListResponseDto> getPopularList() {
+    public ResponseEntity<ResponseDto> getPopularList() {
         GetPopularListResponseDto response = searchService.getPopularList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseDto.success(response));
     }
 
     @GetMapping("/{searchWord}/relation-list")
-    public ResponseEntity<GetRelationListResponseDto> getRelationList(
+    public ResponseEntity<ResponseDto> getRelationList(
             @PathVariable("searchWord") String searchWord
     ) {
         GetRelationListResponseDto response = searchService.getRelationList(searchWord);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseDto.success(response));
     }
 
 }
