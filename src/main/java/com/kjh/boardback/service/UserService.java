@@ -29,13 +29,16 @@ public class UserService {
     }
 
     public void findByNicknameOrElseThrow(String nickname) {
-        userRepository.findByNickname(nickname).orElseThrow(
-                () -> new BusinessException(ResponseCode.DUPLICATE_NICKNAME));
+        if (userRepository.findByNickname(nickname).isPresent()) {
+            throw new BusinessException(ResponseCode.DUPLICATE_NICKNAME);
+        }
     }
 
     public void findByTelNumberOrElseThrow(String telNumber) {
-        userRepository.findByTelNumber(telNumber).orElseThrow(
-                () -> new BusinessException(ResponseCode.DUPLICATE_TEL_NUMBER));
+        if (userRepository.findByTelNumber(telNumber).isPresent()) {
+            throw new BusinessException(ResponseCode.DUPLICATE_TEL_NUMBER);
+        }
+
     }
 
     public void save(User user) {

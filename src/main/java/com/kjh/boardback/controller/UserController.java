@@ -25,19 +25,19 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("")
-    public ResponseEntity<GetSignInUserResponseDto> getSignInUser(
+    public ResponseEntity<ResponseDto> getSignInUser(
             @AuthenticationPrincipal String email
     ) {
         GetSignInUserResponseDto response = userService.getSignInUser(email);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseDto.success(response));
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<GetUserResponseDto> getUser(
+    public ResponseEntity<ResponseDto> getUser(
             @PathVariable("email") String email
     ) {
         GetUserResponseDto response = userService.getUser(email);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ResponseDto.success(response));
     }
 
     @PatchMapping("/nickname")

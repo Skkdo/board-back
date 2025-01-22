@@ -64,6 +64,7 @@ public class AuthControllerTest {
     @DisplayName(value = "회원가입 성공")
     void signUp() throws Exception {
         String url = commonUrl + "/sign-up";
+
         SignUpRequestDto requestDto = validSignUpRequestDto();
         ResponseDto responseDto = ResponseDto.success();
 
@@ -74,28 +75,33 @@ public class AuthControllerTest {
     @DisplayName(value = "회원가입 실패 - 잘못된 email 형식")
     void signUp_valid_email() throws Exception {
         String url = commonUrl + "/sign-up";
+
         SignUpRequestDto requestDto = validSignUpRequestDto();
         requestDto.setEmail("test.com");
-        ResponseDto responseDto = ResponseDto.fail(ResponseCode.VALIDATION_FAILED);
+        BusinessException exception = new BusinessException(ResponseCode.VALIDATION_FAILED);
+        ResponseDto responseDto = ResponseDto.fail(exception);
 
-        perform(url, HttpStatus.BAD_REQUEST.value(), requestDto, responseDto);
+        perform(url, exception.getStatus(), requestDto, responseDto);
     }
 
     @Test
     @DisplayName(value = "회원가입 실패 - 잘못된 telNumber 형식")
     void signUp_valid_telNumber() throws Exception {
         String url = commonUrl + "/sign-up";
+
         SignUpRequestDto requestDto = validSignUpRequestDto();
         requestDto.setTelNumber("abc12345678");
-        ResponseDto responseDto = ResponseDto.fail(ResponseCode.VALIDATION_FAILED);
+        BusinessException exception = new BusinessException(ResponseCode.VALIDATION_FAILED);
+        ResponseDto responseDto = ResponseDto.fail(exception);
 
-        perform(url, HttpStatus.BAD_REQUEST.value(), requestDto, responseDto);
+        perform(url, exception.getStatus(), requestDto, responseDto);
     }
 
     @Test
     @DisplayName(value = "회원가입 실패 - 중복된 email")
     void signUp_duplicate_email() throws Exception {
         String url = commonUrl + "/sign-up";
+
         SignUpRequestDto requestDto = validSignUpRequestDto();
         BusinessException exception = new BusinessException(ResponseCode.DUPLICATE_EMAIL);
         ResponseDto responseDto = ResponseDto.fail(exception);
@@ -109,6 +115,7 @@ public class AuthControllerTest {
     @DisplayName(value = "회원가입 실패 - 중복된 nickname")
     void signUp_duplicate_nickname() throws Exception {
         String url = commonUrl + "/sign-up";
+
         SignUpRequestDto requestDto = validSignUpRequestDto();
         BusinessException exception = new BusinessException(ResponseCode.DUPLICATE_NICKNAME);
         ResponseDto responseDto = ResponseDto.fail(exception);
@@ -122,6 +129,7 @@ public class AuthControllerTest {
     @DisplayName(value = "회원가입 실패 - 중복된 telNumber")
     void signUp_duplicate_telNumber() throws Exception {
         String url = commonUrl + "/sign-up";
+
         SignUpRequestDto requestDto = validSignUpRequestDto();
         BusinessException exception = new BusinessException(ResponseCode.DUPLICATE_TEL_NUMBER);
         ResponseDto responseDto = ResponseDto.fail(exception);
@@ -135,8 +143,9 @@ public class AuthControllerTest {
     @DisplayName(value = "로그인 성공")
     void signIn() throws Exception {
         String url = commonUrl + "/sign-in";
-        SignInRequestDto requestDto = validSignInRequestDto();
         String jwtToken = "token";
+
+        SignInRequestDto requestDto = validSignInRequestDto();
         SignInResponseDto signInResponseDto = new SignInResponseDto(jwtToken);
         ResponseDto responseDto = ResponseDto.success(signInResponseDto);
 
@@ -157,12 +166,14 @@ public class AuthControllerTest {
     @DisplayName(value = "로그인 실패 - 로그인 정보 불일치")
     void signIn_mismatch() throws Exception {
         String url = commonUrl + "/sign-in";
+
         SignInRequestDto requestDto = validSignInRequestDto();
-        ResponseDto responseDto = ResponseDto.fail(ResponseCode.SIGN_IN_FAIL);
+        BusinessException exception = new BusinessException(ResponseCode.SIGN_IN_FAIL);
+        ResponseDto responseDto = ResponseDto.fail(exception);
 
-        doThrow(new BusinessException(ResponseCode.SIGN_IN_FAIL)).when(authService).signIn(any(SignInRequestDto.class));
+        doThrow(exception).when(authService).signIn(any(SignInRequestDto.class));
 
-        perform(url, HttpStatus.UNAUTHORIZED.value(), requestDto, responseDto);
+        perform(url, exception.getStatus(), requestDto, responseDto);
     }
 
     SignUpRequestDto validSignUpRequestDto() {
