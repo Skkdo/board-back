@@ -18,16 +18,14 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException.class})
     public ResponseEntity<ResponseDto> validationExceptionHandler(Exception e) {
         log.warn(e.getMessage(), e);
-        ResponseDto responseDto = new ResponseDto(ResponseCode.VALIDATION_FAILED);
+        ResponseDto responseDto = ResponseDto.fail(ResponseCode.VALIDATION_FAILED);
         return ResponseEntity.status(ResponseCode.VALIDATION_FAILED.getStatus()).body(responseDto);
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ResponseDto> BusinessExceptionHandler(BusinessException e) {
         log.warn(e.getMessage(), e);
-        ResponseCode responseCode = e.getResponseCode();
-        ResponseDto responseDto = new ResponseDto(responseCode);
-        return ResponseEntity.status(responseCode.getStatus()).body(responseDto);
+        ResponseDto responseDto = ResponseDto.fail(e);
+        return ResponseEntity.status(e.getStatus()).body(responseDto);
     }
-
 }

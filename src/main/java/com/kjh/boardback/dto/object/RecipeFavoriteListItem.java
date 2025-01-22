@@ -1,6 +1,6 @@
 package com.kjh.boardback.dto.object;
 
-import com.kjh.boardback.entity.board.Favorite;
+import com.kjh.boardback.entity.recipe_board.RecipeFavorite;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,13 +14,13 @@ public class RecipeFavoriteListItem {
     private String nickname;
     private String profileImage;
 
-    public RecipeFavoriteListItem(Favorite favorite) {
+    public RecipeFavoriteListItem(RecipeFavorite favorite) {
         this.email = favorite.getUser().getEmail();
         this.nickname = favorite.getUser().getNickname();
         this.profileImage = favorite.getUser().getProfileImage();
     }
 
-    public static List<RecipeFavoriteListItem> getList(List<Favorite> favoriteList) {
+    public static List<RecipeFavoriteListItem> getList(List<RecipeFavorite> favoriteList) {
         return favoriteList.stream().map(RecipeFavoriteListItem::new).toList();
     }
 }

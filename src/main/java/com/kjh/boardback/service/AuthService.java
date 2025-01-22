@@ -7,6 +7,7 @@ import com.kjh.boardback.entity.User;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.global.provider.JwtProvider;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,14 +21,16 @@ public class AuthService {
     private final UserService userService;
     private final JwtProvider jwtProvider;
 
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
     public void signUp(SignUpRequestDto dto) {
 
-        userService.findByEmail(dto.getEmail());
-        userService.existsByNickname(dto.getNickname());
-        userService.existsByTelNumber(dto.getTelNumber());
+        if(userService.findByEmail(dto.getEmail()).isPresent()) {
+            throw new BusinessException(ResponseCode.DUPLICATE_EMAIL);
+        }
+        userService.findByNicknameOrElseThrow(dto.getNickname());
+        userService.findByTelNumberOrElseThrow(dto.getTelNumber());
 
         String password = dto.getPassword();
         String encodedPassword = passwordEncoder.encode(password);
@@ -40,8 +43,12 @@ public class AuthService {
     public SignInResponseDto signIn(SignInRequestDto dto) {
 
         String email = dto.getEmail();
-        User user = userService.findByEmail(email);
+        Optional<User> optional = userService.findByEmail(email);
+        if(optional.isEmpty()){
+            throw  new BusinessException(ResponseCode.SIGN_IN_FAIL);
+        }
 
+        User user = optional.get();
         String password = dto.getPassword();
         String encodedPassword = user.getPassword();
 

@@ -2,20 +2,19 @@ package com.kjh.boardback.dto.response.recipe_board;
 
 import com.kjh.boardback.entity.recipe_board.RecipeBoard;
 import com.kjh.boardback.entity.recipe_board.RecipeImage;
-import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class GetRecipeBoardResponseDto extends ResponseDto {
+public class GetRecipeBoardResponseDto {
 
     private int boardNumber;
     private String title;
     private String content;
     private List<String> boardImageList;
-    private String writeDatetime;
+    private LocalDateTime writeDatetime;
     private String writerEmail;
     private String writerNickname;
     private String writerProfileImage;
@@ -40,7 +39,6 @@ public class GetRecipeBoardResponseDto extends ResponseDto {
 
 
     public GetRecipeBoardResponseDto(RecipeBoard board, List<RecipeImage> imageList) {
-        super(ResponseCode.SUCCESS);
 
         List<String> boardImageList = new ArrayList<>();
 
@@ -50,7 +48,7 @@ public class GetRecipeBoardResponseDto extends ResponseDto {
         this.title = board.getTitle();
         this.content = board.getContent();
         this.boardImageList = boardImageList;
-        this.writeDatetime = board.getCreatedAt().toString();
+        this.writeDatetime = board.getCreatedAt();
         this.writerEmail = board.getWriter().getEmail();
         this.writerNickname = board.getWriter().getNickname();
         this.writerProfileImage = board.getWriter().getProfileImage();

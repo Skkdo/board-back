@@ -2,26 +2,24 @@ package com.kjh.boardback.dto.response.board;
 
 import com.kjh.boardback.entity.board.Board;
 import com.kjh.boardback.entity.board.Image;
-import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class GetBoardResponseDto extends ResponseDto {
+public class GetBoardResponseDto {
 
     private int boardNumber;
     private String title;
     private String content;
     private List<String> boardImageList;
-    private String writeDatetime;
+    private LocalDateTime writeDatetime;
     private String writerEmail;
     private String writerNickname;
     private String writerProfileImage;
 
     public GetBoardResponseDto(Board board, List<Image> imageList) {
-        super(ResponseCode.SUCCESS);
 
         List<String> boardImageList = new ArrayList<>();
         for (Image image : imageList) {
@@ -33,7 +31,7 @@ public class GetBoardResponseDto extends ResponseDto {
         this.title = board.getTitle();
         this.content = board.getContent();
         this.boardImageList = boardImageList;
-        this.writeDatetime = board.getCreatedAt().toString();
+        this.writeDatetime = board.getCreatedAt();
         this.writerEmail = board.getWriter().getEmail();
         this.writerNickname = board.getWriter().getNickname();
         this.writerProfileImage = board.getWriter().getProfileImage();

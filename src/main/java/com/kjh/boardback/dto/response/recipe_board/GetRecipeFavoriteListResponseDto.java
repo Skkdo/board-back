@@ -1,19 +1,16 @@
 package com.kjh.boardback.dto.response.recipe_board;
 
 import com.kjh.boardback.dto.object.RecipeFavoriteListItem;
-import com.kjh.boardback.entity.board.Favorite;
-import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
+import com.kjh.boardback.entity.recipe_board.RecipeFavorite;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class GetRecipeFavoriteListResponseDto extends ResponseDto {
+public class GetRecipeFavoriteListResponseDto {
 
     private final List<RecipeFavoriteListItem> favoriteList;
 
-    public GetRecipeFavoriteListResponseDto(List<Favorite> favoriteList) {
-        super(ResponseCode.SUCCESS);
+    public GetRecipeFavoriteListResponseDto(List<RecipeFavorite> favoriteList) {
         this.favoriteList = RecipeFavoriteListItem.getList(favoriteList);
     }
 }

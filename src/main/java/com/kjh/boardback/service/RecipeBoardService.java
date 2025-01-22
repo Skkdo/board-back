@@ -1,27 +1,21 @@
 package com.kjh.boardback.service;
 
 
-import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
+import com.kjh.boardback.dto.request.recipe_board.PatchRecipeCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
-import com.kjh.boardback.dto.response.recipe_board.GetLatestRecipeBoardListResponseDto;
+import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardListResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeCommentListResponseDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeFavoriteListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetSearchRecipeBoardListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetTop3ConvenienceRecipeBoardListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetTop3GeneralRecipeBoardListResponseDto;
-import com.kjh.boardback.dto.response.recipe_board.GetUserRecipeBoardListResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
-import com.kjh.boardback.entity.board.Favorite;
 import com.kjh.boardback.entity.recipe_board.RecipeBoard;
 import com.kjh.boardback.entity.recipe_board.RecipeComment;
 import com.kjh.boardback.entity.recipe_board.RecipeFavorite;
 import com.kjh.boardback.entity.recipe_board.RecipeImage;
 import com.kjh.boardback.global.common.ResponseCode;
-import com.kjh.boardback.global.common.ResponseDto;
 import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeBoardRepository;
@@ -69,27 +63,25 @@ public class RecipeBoardService {
         return new GetRecipeBoardResponseDto(board, imageList);
     }
 
-    public GetLatestRecipeBoardListResponseDto getLatestBoardList(int type) {
+    public GetRecipeBoardListResponseDto getLatestBoardList(int type) {
         List<RecipeBoard> boardList = boardRepository.getLatestList(type);
-        return new GetLatestRecipeBoardListResponseDto(boardList);
+        return new GetRecipeBoardListResponseDto(boardList);
     }
 
-    public ResponseDto getTop3BoardList(int type) {
+    public GetRecipeBoardListResponseDto getTop3BoardList(int type) {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         List<RecipeBoard> boardList = boardRepository.getTop3ListWithin7Days(type, sevenDaysAgo, pageable);
 
-        if (type == 0) {
-            return new GetTop3GeneralRecipeBoardListResponseDto(boardList);
-        } else if (type == 1) {
-            return new GetTop3ConvenienceRecipeBoardListResponseDto(boardList);
+        if (type == 0 || type == 1) {
+            return new GetRecipeBoardListResponseDto(boardList);
         } else {
             throw new BusinessException(ResponseCode.NOT_EXISTED_BOARD);
         }
     }
 
-    public GetSearchRecipeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+    public GetRecipeBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
 
         List<RecipeBoard> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
 
@@ -102,15 +94,15 @@ public class RecipeBoardService {
             searchLogRepository.save(searchLog);
         }
 
-        return new GetSearchRecipeBoardListResponseDto(boardList);
+        return new GetRecipeBoardListResponseDto(boardList);
     }
 
-    public GetUserRecipeBoardListResponseDto getUserBoardList(String email) {
+    public GetRecipeBoardListResponseDto getUserBoardList(String email) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         List<RecipeBoard> boardList = boardRepository.getUserBoardList(email);
 
-        return new GetUserRecipeBoardListResponseDto(boardList);
+        return new GetRecipeBoardListResponseDto(boardList);
     }
 
     @Transactional
@@ -123,7 +115,7 @@ public class RecipeBoardService {
     @Transactional
     public void postBoard(PostRecipeBoardRequestDto dto, String email) {
 
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         RecipeBoard board = RecipeBoard.from(dto, user);
         boardRepository.save(board);
 
@@ -203,7 +195,7 @@ public class RecipeBoardService {
     public void patchBoard(PatchRecipeBoardRequestDto dto, Integer boardNumber, String email) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -224,7 +216,7 @@ public class RecipeBoardService {
     public void deleteBoard(Integer boardNumber, String email) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -248,7 +240,7 @@ public class RecipeBoardService {
     public void postComment(Integer boardNumber, String email, PostRecipeCommentRequestDto dto) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         RecipeComment comment = RecipeComment.from(board, user, dto);
         commentRepository.save(comment);
@@ -258,9 +250,9 @@ public class RecipeBoardService {
     }
 
     @Transactional
-    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
+    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchRecipeCommentRequestDto dto) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);
         RecipeComment comment = findByCommentNumber(commentNumber);
 
@@ -277,7 +269,7 @@ public class RecipeBoardService {
     @Transactional
     public void deleteComment(Integer boardNumber, Integer commentNumber, String email) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         RecipeBoard board = findByBoardNumber(boardNumber);
         RecipeComment comment = findByCommentNumber(commentNumber);
 
@@ -298,14 +290,14 @@ public class RecipeBoardService {
 
     public GetRecipeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
         findByBoardNumber(boardNumber);
-        List<Favorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
+        List<RecipeFavorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
         return new GetRecipeFavoriteListResponseDto(favoriteList);
     }
 
     @Transactional
     public void putFavorite(String email, Integer boardNumber) {
 
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         RecipeBoard board = findByBoardNumber(boardNumber);
 
         Optional<RecipeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(

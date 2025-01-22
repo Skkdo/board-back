@@ -4,13 +4,10 @@ import com.kjh.boardback.dto.request.board.PatchBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
+import com.kjh.boardback.dto.response.board.GetBoardListResponseDto;
 import com.kjh.boardback.dto.response.board.GetBoardResponseDto;
 import com.kjh.boardback.dto.response.board.GetCommentListResponseDto;
 import com.kjh.boardback.dto.response.board.GetFavoriteListResponseDto;
-import com.kjh.boardback.dto.response.board.GetLatestBoardListResponseDto;
-import com.kjh.boardback.dto.response.board.GetSearchBoardListResponseDto;
-import com.kjh.boardback.dto.response.board.GetTop3BoardListResponseDto;
-import com.kjh.boardback.dto.response.board.GetUserBoardListResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.board.Board;
@@ -64,13 +61,13 @@ public class BoardService {
         return new GetBoardResponseDto(board, imageList);
     }
 
-    public GetUserBoardListResponseDto getUserBoardList(String email) {
-        User user = userService.findByEmail(email);
+    public GetBoardListResponseDto getUserBoardList(String email) {
+        User user = userService.findByEmailOrElseThrow(email);
         List<Board> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
-        return new GetUserBoardListResponseDto(boardList, user);
+        return new GetBoardListResponseDto(boardList, user);
     }
 
-    public GetSearchBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
+    public GetBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
 
         List<Board> boardList = boardRepository.getBySearchWord(searchWord, searchWord);
 
@@ -83,21 +80,21 @@ public class BoardService {
             searchLogRepository.save(searchLog);
         }
 
-        return new GetSearchBoardListResponseDto(boardList);
+        return new GetBoardListResponseDto(boardList);
     }
 
-    public GetTop3BoardListResponseDto getTop3BoardList() {
+    public GetBoardListResponseDto getTop3BoardList() {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo,pageable);
+        List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
 
-        return new GetTop3BoardListResponseDto(top3List);
+        return new GetBoardListResponseDto(top3List);
     }
 
-    public GetLatestBoardListResponseDto getLatestBoardList() {
+    public GetBoardListResponseDto getLatestBoardList() {
         List<Board> latestBoardList = boardRepository.getLatestBoardList();
-        return new GetLatestBoardListResponseDto(latestBoardList);
+        return new GetBoardListResponseDto(latestBoardList);
     }
 
     @Transactional
@@ -109,7 +106,7 @@ public class BoardService {
 
     @Transactional
     public void postBoard(PostBoardRequestDto dto, String email) {
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
         Board board = Board.from(dto, user);
         boardRepository.save(board);
 
@@ -127,7 +124,7 @@ public class BoardService {
     public void patchBoard(PatchBoardRequestDto dto, Integer boardNumber, String email) {
 
         Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -152,7 +149,7 @@ public class BoardService {
     public void deleteBoard(Integer boardNumber, String email) {
 
         Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
 
         String writerEmail = board.getWriter().getEmail();
         boolean isWriter = writerEmail.equals(email);
@@ -177,7 +174,7 @@ public class BoardService {
     @Transactional
     public void postComment(Integer boardNumber, String email, PostCommentRequestDto dto) {
         Board board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         Comment comment = new Comment(board, user, dto);
         commentRepository.save(comment);
@@ -189,7 +186,7 @@ public class BoardService {
     @Transactional
     public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
 
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);
 
         Comment comment = findByCommentNumber(commentNumber);
@@ -207,7 +204,7 @@ public class BoardService {
     public void deleteComment(Integer boardNumber, String email, Integer commentNumber) {
 
         Board board = findByBoardNumber(boardNumber);
-        userService.findByEmail(email);
+        userService.findByEmailOrElseThrow(email);
         Comment comment = findByCommentNumber(commentNumber);
 
         String writerEmail = board.getWriter().getEmail();
@@ -236,7 +233,7 @@ public class BoardService {
     public void putFavorite(String email, Integer boardNumber) {
 
         Board board = findByBoardNumber(boardNumber);
-        User user = userService.findByEmail(email);
+        User user = userService.findByEmailOrElseThrow(email);
 
         Optional<Favorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
                 boardNumber, email);

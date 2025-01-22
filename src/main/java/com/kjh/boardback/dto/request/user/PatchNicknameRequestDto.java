@@ -1,14 +1,18 @@
 package com.kjh.boardback.dto.request.user;
 
+import com.kjh.boardback.global.common.RequestDto;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
-public class PatchNicknameRequestDto {
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PatchNicknameRequestDto extends RequestDto {
 
     @NotBlank
     private String nickname;

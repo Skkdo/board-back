@@ -1,6 +1,5 @@
 package com.kjh.boardback.repository.recipe_board;
 
-import com.kjh.boardback.entity.board.Favorite;
 import com.kjh.boardback.entity.compositeKey.RecipeFavoritePk;
 import com.kjh.boardback.entity.recipe_board.RecipeFavorite;
 import java.util.List;
@@ -18,7 +17,7 @@ public interface RecipeFavoriteRepository extends JpaRepository<RecipeFavorite, 
     @Query("SELECT f FROM RecipeFavorite f " +
             "JOIN FETCH f.user " +
             "WHERE f.board.boardNumber = :boardNumber")
-    List<Favorite> getFavoriteListWithUser(@Param("boardNumber") Integer boardNumber);
+    List<RecipeFavorite> getFavoriteListWithUser(@Param("boardNumber") Integer boardNumber);
 
     void deleteByBoard_BoardNumber(Integer boardNumber);
 }
