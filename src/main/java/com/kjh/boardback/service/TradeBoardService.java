@@ -60,10 +60,9 @@ public class TradeBoardService {
         return new GetTradeBoardResponseDto(board, imageList);
     }
 
-    public GetTradeBoardListResponseDto getTop3BoardList() {
-        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<TradeBoard> boardList = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
+    public GetTradeBoardListResponseDto getUserBoardList(String email) {
+        userService.findByEmailOrElseThrow(email);
+        List<TradeBoard> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
         return new GetTradeBoardListResponseDto(boardList);
     }
 
@@ -81,9 +80,10 @@ public class TradeBoardService {
         return new GetTradeBoardListResponseDto(boardList);
     }
 
-    public GetTradeBoardListResponseDto getUserBoardList(String email) {
-        userService.findByEmailOrElseThrow(email);
-        List<TradeBoard> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
+    public GetTradeBoardListResponseDto getTop3BoardList() {
+        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<TradeBoard> boardList = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
         return new GetTradeBoardListResponseDto(boardList);
     }
 
@@ -116,7 +116,7 @@ public class TradeBoardService {
     }
 
     @Transactional
-    public void patchBoard(PatchTradeBoardRequestDto dto, String email, Integer boardNumber) {
+    public void patchBoard(PatchTradeBoardRequestDto dto, Integer boardNumber, String email) {
         TradeBoard board = findByBoardNumber(boardNumber);
         userService.findByEmailOrElseThrow(email);
 
@@ -140,7 +140,7 @@ public class TradeBoardService {
     }
 
     @Transactional
-    public void deleteBoard(String email, Integer boardNumber) {
+    public void deleteBoard(Integer boardNumber, String email) {
         TradeBoard board = findByBoardNumber(boardNumber);
         userService.findByEmailOrElseThrow(email);
 
@@ -194,7 +194,7 @@ public class TradeBoardService {
     }
 
     @Transactional
-    public void deleteComment(Integer boardNumber, Integer commentNumber, String email) {
+    public void deleteComment(Integer boardNumber, String email, Integer commentNumber) {
 
         userService.findByEmailOrElseThrow(email);
         TradeBoard board = findByBoardNumber(boardNumber);

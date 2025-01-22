@@ -61,7 +61,7 @@ public class TradeBoardController {
             @RequestBody @Valid PatchTradeBoardRequestDto requestDto,
             @PathVariable("boardNumber") Integer boardNumber
     ) {
-        boardService.patchBoard(requestDto, email, boardNumber);
+        boardService.patchBoard(requestDto, boardNumber, email);
         return ResponseEntity.ok().body(ResponseDto.success());
     }
 
@@ -70,7 +70,7 @@ public class TradeBoardController {
             @AuthenticationPrincipal String email,
             @PathVariable("boardNumber") Integer boardNumber
     ) {
-        boardService.deleteBoard(email, boardNumber);
+        boardService.deleteBoard(boardNumber, email);
         return ResponseEntity.ok().body(ResponseDto.success());
     }
 
@@ -158,7 +158,7 @@ public class TradeBoardController {
             @PathVariable("boardNumber") Integer boardNumber,
             @PathVariable("commentNumber") Integer commentNumber
     ) {
-        boardService.deleteComment(boardNumber, commentNumber, email);
+        boardService.deleteComment(boardNumber, email, commentNumber);
         return ResponseEntity.ok().body(ResponseDto.success());
     }
 

@@ -1,7 +1,7 @@
 package com.kjh.boardback.controller;
 
-import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
+import com.kjh.boardback.dto.request.recipe_board.PatchRecipeCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardListResponseDto;
@@ -139,7 +139,7 @@ public class RecipeBoardController {
     @PatchMapping("/{boardNumber}/{commentNumber}")
     public ResponseEntity<ResponseDto> patchComment(
             @AuthenticationPrincipal String email,
-            @RequestBody @Valid PatchCommentRequestDto dto,
+            @RequestBody @Valid PatchRecipeCommentRequestDto dto,
             @PathVariable("boardNumber") Integer boardNumber,
             @PathVariable("commentNumber") Integer commentNumber
     ) {

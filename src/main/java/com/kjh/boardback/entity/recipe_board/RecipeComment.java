@@ -1,7 +1,6 @@
 package com.kjh.boardback.entity.recipe_board;
 
-import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
-import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
+import com.kjh.boardback.dto.request.recipe_board.PatchRecipeCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
 import com.kjh.boardback.entity.BaseEntity;
 import com.kjh.boardback.entity.User;
@@ -45,7 +44,7 @@ public class RecipeComment extends BaseEntity {
     @JoinColumn(name = "board_number", nullable = false)
     private RecipeBoard board;
 
-    public void patchComment(PatchCommentRequestDto dto) {
+    public void patchComment(PatchRecipeCommentRequestDto dto) {
         this.content = dto.getContent();
     }
 

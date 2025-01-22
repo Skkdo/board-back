@@ -2,6 +2,7 @@ package com.kjh.boardback.dto.response.trade_board;
 
 import com.kjh.boardback.entity.trade_board.TradeBoard;
 import com.kjh.boardback.entity.trade_board.TradeImage;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class GetTradeBoardResponseDto {
     private final String title;
     private final String content;
     private final List<String> boardImageList;
-    private final String writeDatetime;
+    private final LocalDateTime writeDatetime;
     private final String writerEmail;
     private final String tradeLocation;
     private final String price;
@@ -32,7 +33,7 @@ public class GetTradeBoardResponseDto {
         this.title = board.getTitle();
         this.content = board.getContent();
         this.boardImageList = boardImageList;
-        this.writeDatetime = board.getCreatedAt().toString();
+        this.writeDatetime = board.getCreatedAt();
         this.writerEmail = board.getWriter().getEmail();
         this.tradeLocation = board.getTradeLocation();
         this.price = board.getPrice();

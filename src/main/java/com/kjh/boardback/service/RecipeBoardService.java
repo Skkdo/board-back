@@ -1,8 +1,8 @@
 package com.kjh.boardback.service;
 
 
-import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
+import com.kjh.boardback.dto.request.recipe_board.PatchRecipeCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeCommentRequestDto;
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeBoardListResponseDto;
@@ -11,7 +11,6 @@ import com.kjh.boardback.dto.response.recipe_board.GetRecipeCommentListResponseD
 import com.kjh.boardback.dto.response.recipe_board.GetRecipeFavoriteListResponseDto;
 import com.kjh.boardback.entity.SearchLog;
 import com.kjh.boardback.entity.User;
-import com.kjh.boardback.entity.board.Favorite;
 import com.kjh.boardback.entity.recipe_board.RecipeBoard;
 import com.kjh.boardback.entity.recipe_board.RecipeComment;
 import com.kjh.boardback.entity.recipe_board.RecipeFavorite;
@@ -251,7 +250,7 @@ public class RecipeBoardService {
     }
 
     @Transactional
-    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
+    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchRecipeCommentRequestDto dto) {
 
         userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);
@@ -291,7 +290,7 @@ public class RecipeBoardService {
 
     public GetRecipeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
         findByBoardNumber(boardNumber);
-        List<Favorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
+        List<RecipeFavorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
         return new GetRecipeFavoriteListResponseDto(favoriteList);
     }
 
