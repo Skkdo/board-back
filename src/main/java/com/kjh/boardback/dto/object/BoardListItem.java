@@ -2,12 +2,14 @@ package com.kjh.boardback.dto.object;
 
 import com.kjh.boardback.entity.User;
 import com.kjh.boardback.entity.board.Board;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 @Getter
 @Builder
@@ -21,7 +23,7 @@ public class BoardListItem {
     private int favoriteCount;
     private int commentCount;
     private int viewCount;
-    private String writeDatetime;
+    private LocalDateTime writeDatetime;
     private String writerNickname;
     private String writerProfileImage;
 
@@ -34,7 +36,7 @@ public class BoardListItem {
                 .favoriteCount(board.getFavoriteCount())
                 .commentCount(board.getCommentCount())
                 .viewCount(board.getViewCount())
-                .writeDatetime(board.getCreatedAt().toString())
+                .writeDatetime(board.getCreatedAt())
                 .writerNickname(user.getNickname())
                 .writerProfileImage(user.getProfileImage())
                 .build();
@@ -49,7 +51,7 @@ public class BoardListItem {
                 .favoriteCount(board.getFavoriteCount())
                 .commentCount(board.getCommentCount())
                 .viewCount(board.getViewCount())
-                .writeDatetime(board.getCreatedAt().toString())
+                .writeDatetime(board.getCreatedAt())
                 .writerNickname(board.getWriter().getNickname())
                 .writerProfileImage(board.getWriter().getProfileImage())
                 .build();
@@ -67,5 +69,9 @@ public class BoardListItem {
         return boardList.stream()
                 .map(BoardListItem::from)
                 .collect(Collectors.toList());
+    }
+
+    public static Page<BoardListItem> getList(Page<Board> boardList) {
+        return boardList.map(BoardListItem::from);
     }
 }

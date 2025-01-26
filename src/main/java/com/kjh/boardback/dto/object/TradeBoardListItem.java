@@ -1,6 +1,7 @@
 package com.kjh.boardback.dto.object;
 
 import com.kjh.boardback.entity.trade_board.TradeBoard;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ public class TradeBoardListItem {
     private int favoriteCount;
     private int commentCount;
     private int viewCount;
-    private String writeDatetime;
+    private LocalDateTime writeDatetime;
     private String tradeLocation;
     private String price;
     private String writerNickname;
@@ -29,7 +30,7 @@ public class TradeBoardListItem {
         this.favoriteCount = board.getFavoriteCount();
         this.commentCount = board.getCommentCount();
         this.viewCount = board.getViewCount();
-        this.writeDatetime = board.getCreatedAt().toString();
+        this.writeDatetime = board.getCreatedAt();
         this.tradeLocation = board.getTradeLocation();
         this.price = board.getPrice();
         this.writerNickname = board.getWriter().getNickname();

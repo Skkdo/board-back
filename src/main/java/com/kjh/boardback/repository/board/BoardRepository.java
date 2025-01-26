@@ -4,6 +4,7 @@ import com.kjh.boardback.entity.board.Board;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,12 +28,11 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
             "JOIN FETCH b.writer " +
             "WHERE b.createdAt >= :sevenDaysAgo " +
             "ORDER BY b.viewCount DESC, b.favoriteCount DESC")
-    List<Board> getTop3Within7Days(@Param("sevenDaysAgo")LocalDateTime sevenDaysAgo, Pageable pageable);
+    List<Board> getTop3Within7Days(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo, Pageable pageable);
 
-    @Query("SELECT b FROM Board b " +
-            "JOIN FETCH b.writer " +
-            "ORDER BY b.createdAt DESC")
-    List<Board> getLatestBoardList();
+    @Query(value = "SELECT b FROM Board b JOIN FETCH b.writer",
+            countQuery = "SELECT COUNT (b) FROM Board b")
+    Page<Board> getLatestBoardList(Pageable pageable);
 
     @Query("SELECT b FROM Board b " +
             "JOIN FETCH b.writer " +

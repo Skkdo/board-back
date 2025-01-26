@@ -15,6 +15,7 @@ import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
 import com.kjh.boardback.dto.response.board.GetBoardListResponseDto;
+import com.kjh.boardback.dto.response.board.GetBoardPageListResponseDto;
 import com.kjh.boardback.dto.response.board.GetBoardResponseDto;
 import com.kjh.boardback.dto.response.board.GetCommentListResponseDto;
 import com.kjh.boardback.dto.response.board.GetFavoriteListResponseDto;
@@ -31,6 +32,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -60,6 +65,7 @@ public class BoardControllerTest {
                 .standaloneSetup(boardController)
                 .setControllerAdvice(GlobalExceptionHandler.class)
                 .setValidator(new LocalValidatorFactoryBean())
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
@@ -139,12 +145,16 @@ public class BoardControllerTest {
     void getLatestBoardList() throws Exception {
         String url = commonUrl + "/latest-list";
 
-        GetBoardListResponseDto mock = mock(GetBoardListResponseDto.class);
+        GetBoardPageListResponseDto mock = mock(GetBoardPageListResponseDto.class);
         ResponseDto responseDto = ResponseDto.success(mock);
-        doReturn(mock).when(boardService).getLatestBoardList();
+        doReturn(mock).when(boardService)
+                .getLatestBoardList(PageRequest.of(0, 10, Sort.by(Direction.DESC, "createdAt")));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get(url)
+                                .param("page", "0")
+                                .param("size", "10")
+                                .param("sort", "createdAt,DESC")
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(responseDto.getCode()))

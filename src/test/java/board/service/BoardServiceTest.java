@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -14,6 +15,7 @@ import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
 import com.kjh.boardback.dto.response.board.GetBoardListResponseDto;
+import com.kjh.boardback.dto.response.board.GetBoardPageListResponseDto;
 import com.kjh.boardback.dto.response.board.GetBoardResponseDto;
 import com.kjh.boardback.dto.response.board.GetCommentListResponseDto;
 import com.kjh.boardback.dto.response.board.GetFavoriteListResponseDto;
@@ -25,11 +27,13 @@ import com.kjh.boardback.entity.board.Favorite;
 import com.kjh.boardback.entity.board.Image;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
+import com.kjh.boardback.repository.RedisRepository;
 import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.board.BoardRepository;
 import com.kjh.boardback.repository.board.CommentRepository;
 import com.kjh.boardback.repository.board.FavoriteRepository;
 import com.kjh.boardback.repository.board.ImageRepository;
+import com.kjh.boardback.service.AsyncService;
 import com.kjh.boardback.service.BoardService;
 import com.kjh.boardback.service.UserService;
 import java.time.LocalDateTime;
@@ -41,6 +45,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -71,6 +77,12 @@ public class BoardServiceTest {
 
     @Mock
     private SearchLogRepository searchLogRepository;
+
+    @Mock
+    private RedisRepository redisRepository;
+
+    @Mock
+    private AsyncService asyncService;
 
     private final User user = User.builder()
             .email("email@email.com")
@@ -179,6 +191,7 @@ public class BoardServiceTest {
         List<Board> boardList = List.of();
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
 
+        doReturn(boardList).when(redisRepository).getBoardTop3Values();
         doReturn(boardList).when(boardRepository).getTop3Within7Days(any(LocalDateTime.class), eq(pageable));
 
         GetBoardListResponseDto responseDto = boardService.getTop3BoardList();
@@ -190,22 +203,24 @@ public class BoardServiceTest {
     @Test
     @DisplayName("최신 보드 리스트 조회 성공")
     void getLatestBoardList() {
-        List<Board> boardList = List.of();
+        Page<Board> boardList = new PageImpl<>(List.of());
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
-        doReturn(boardList).when(boardRepository).getLatestBoardList();
+        doReturn(boardList).when(boardRepository).getLatestBoardList(pageRequest);
 
-        GetBoardListResponseDto responseDto = boardService.getLatestBoardList();
+        GetBoardPageListResponseDto responseDto = boardService.getLatestBoardList(pageRequest);
 
         assertThat(responseDto.getBoardList()).isEqualTo(boardList);
-        verify(boardRepository, times(1)).getLatestBoardList();
+        verify(boardRepository, times(1)).getLatestBoardList(pageRequest);
     }
 
     @Test
-    @DisplayName("최신 보드 리스트 조회 성공")
+    @DisplayName("조회수 증가 성공")
     void increaseViewCount() {
         Board board = board();
         int viewCount = board.getViewCount();
 
+        doNothing().when(asyncService).updateTop3IfNeed(board);
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.increaseViewCount(board.getBoardNumber());
@@ -242,6 +257,7 @@ public class BoardServiceTest {
                 .boardImageList(list)
                 .build();
 
+        doNothing().when(asyncService).patchBoardIfTop3(board);
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.patchBoard(patchBoardRequestDto, board.getBoardNumber(), user.getEmail());
@@ -277,6 +293,7 @@ public class BoardServiceTest {
     void deleteBoard() {
         Board board = board();
 
+        doNothing().when(asyncService).deleteBoardIfTop3(board.getBoardNumber());
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.deleteBoard(board.getBoardNumber(), user.getEmail());
@@ -328,7 +345,8 @@ public class BoardServiceTest {
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());
 
-        boardService.patchComment(board.getBoardNumber(), comment.getCommentNumber(), user.getEmail(), patchCommentRequestDto);
+        boardService.patchComment(board.getBoardNumber(), comment.getCommentNumber(), user.getEmail(),
+                patchCommentRequestDto);
 
         verify(commentRepository, times(1)).save(comment);
     }
@@ -369,6 +387,7 @@ public class BoardServiceTest {
     void putFavorite() {
         Board board = board();
 
+        doNothing().when(asyncService).updateTop3IfNeed(board);
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.empty()).when(favoriteRepository)
@@ -386,6 +405,7 @@ public class BoardServiceTest {
         Board board = board();
         Favorite favorite = new Favorite(board, user);
 
+        doNothing().when(asyncService).updateTop3IfNeed(board);
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.of(favorite)).when(favoriteRepository)

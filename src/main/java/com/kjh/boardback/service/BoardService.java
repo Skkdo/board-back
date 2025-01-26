@@ -5,6 +5,7 @@ import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
 import com.kjh.boardback.dto.response.board.GetBoardListResponseDto;
+import com.kjh.boardback.dto.response.board.GetBoardPageListResponseDto;
 import com.kjh.boardback.dto.response.board.GetBoardResponseDto;
 import com.kjh.boardback.dto.response.board.GetCommentListResponseDto;
 import com.kjh.boardback.dto.response.board.GetFavoriteListResponseDto;
@@ -16,6 +17,7 @@ import com.kjh.boardback.entity.board.Favorite;
 import com.kjh.boardback.entity.board.Image;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
+import com.kjh.boardback.repository.RedisRepository;
 import com.kjh.boardback.repository.SearchLogRepository;
 import com.kjh.boardback.repository.board.BoardRepository;
 import com.kjh.boardback.repository.board.CommentRepository;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,6 +46,8 @@ public class BoardService {
     private final FavoriteRepository favoriteRepository;
     private final CommentRepository commentRepository;
     private final SearchLogRepository searchLogRepository;
+    private final AsyncService asyncService;
+    private final RedisRepository redisRepository;
 
     public Board findByBoardNumber(Integer boardNumber) {
         return boardRepository.findByBoardNumber(boardNumber).orElseThrow(
@@ -84,25 +89,35 @@ public class BoardService {
     }
 
     public GetBoardListResponseDto getTop3BoardList() {
+        List<Board> boardList = redisRepository.getBoardTop3Values();
 
-        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
+        if (boardList.size() < 3) {
+            Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+            LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
-        return new GetBoardListResponseDto(top3List);
+            List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
+            redisRepository.setBoardTop3Values(top3List);
+
+            return new GetBoardListResponseDto(top3List);
+        } else {
+            return new GetBoardListResponseDto(boardList);
+        }
     }
 
-    public GetBoardListResponseDto getLatestBoardList() {
-        List<Board> latestBoardList = boardRepository.getLatestBoardList();
-        return new GetBoardListResponseDto(latestBoardList);
+    public GetBoardPageListResponseDto getLatestBoardList(Pageable pageable) {
+        Page<Board> latestBoardList = boardRepository.getLatestBoardList(pageable);
+        return new GetBoardPageListResponseDto(latestBoardList);
     }
 
     @Transactional
     public void increaseViewCount(Integer boardNumber) {
         Board board = findByBoardNumber(boardNumber);
         board.increaseViewCount();
+        asyncService.updateTop3IfNeed(board);
+
         boardRepository.save(board);
     }
+
 
     @Transactional
     public void postBoard(PostBoardRequestDto dto, String email) {
@@ -143,7 +158,9 @@ public class BoardService {
             imageEntities.add(imageEntity);
         }
         imageRepository.saveAll(imageEntities);
+        asyncService.patchBoardIfTop3(board);
     }
+
 
     @Transactional
     public void deleteBoard(Integer boardNumber, String email) {
@@ -161,7 +178,9 @@ public class BoardService {
         favoriteRepository.deleteByBoard_BoardNumber(boardNumber);
         commentRepository.deleteByBoard_BoardNumber(boardNumber);
         boardRepository.delete(board);
+        asyncService.deleteBoardIfTop3(boardNumber);
     }
+
 
     public GetCommentListResponseDto getCommentList(Integer boardNumber) {
 
@@ -247,8 +266,8 @@ public class BoardService {
             favoriteRepository.delete(favorite);
             board.decreaseFavoriteCount();
         }
-
         boardRepository.save(board);
+        asyncService.updateTop3IfNeed(board);
     }
 
 
