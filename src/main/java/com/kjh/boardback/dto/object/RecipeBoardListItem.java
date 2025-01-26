@@ -1,6 +1,7 @@
 package com.kjh.boardback.dto.object;
 
 import com.kjh.boardback.entity.recipe_board.RecipeBoard;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class RecipeBoardListItem {
     private int favoriteCount;
     private int commentCount;
     private int viewCount;
-    private String writeDatetime;
+    private LocalDateTime writeDatetime;
     private String writerNickname;
     private String writerProfileImage;
     private int type;
@@ -39,7 +40,7 @@ public class RecipeBoardListItem {
         this.favoriteCount = board.getFavoriteCount();
         this.commentCount = board.getCommentCount();
         this.viewCount = board.getViewCount();
-        this.writeDatetime = board.getCreatedAt().toString();
+        this.writeDatetime = board.getCreatedAt();
         this.writerNickname = board.getWriter().getNickname();
         this.writerProfileImage = board.getWriter().getProfileImage();
         this.cookingTime = board.getCookingTime();

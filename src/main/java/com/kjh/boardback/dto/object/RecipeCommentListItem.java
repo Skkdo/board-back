@@ -1,6 +1,7 @@
 package com.kjh.boardback.dto.object;
 
 import com.kjh.boardback.entity.recipe_board.RecipeComment;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,14 +14,14 @@ public class RecipeCommentListItem {
     private Integer commentNumber;
     private String nickname;
     private String profileImage;
-    private String writeDatetime;
+    private LocalDateTime writeDatetime;
     private String content;
 
     private RecipeCommentListItem(RecipeComment comment) {
         this.commentNumber = comment.getCommentNumber();
         this.nickname = comment.getWriter().getNickname();
         this.profileImage = comment.getWriter().getProfileImage();
-        this.writeDatetime = comment.getCreatedAt().toString();
+        this.writeDatetime = comment.getCreatedAt();
         this.content = comment.getContent();
     }
 

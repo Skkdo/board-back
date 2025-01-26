@@ -5,6 +5,7 @@ import com.kjh.boardback.dto.request.board.PatchCommentRequestDto;
 import com.kjh.boardback.dto.request.board.PostBoardRequestDto;
 import com.kjh.boardback.dto.request.board.PostCommentRequestDto;
 import com.kjh.boardback.dto.response.board.GetBoardListResponseDto;
+import com.kjh.boardback.dto.response.board.GetBoardPageListResponseDto;
 import com.kjh.boardback.dto.response.board.GetBoardResponseDto;
 import com.kjh.boardback.dto.response.board.GetCommentListResponseDto;
 import com.kjh.boardback.dto.response.board.GetFavoriteListResponseDto;
@@ -12,6 +13,9 @@ import com.kjh.boardback.global.common.ResponseDto;
 import com.kjh.boardback.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,8 +69,10 @@ public class BoardController {
     }
 
     @GetMapping("/latest-list")
-    public ResponseEntity<ResponseDto> getLatestBoardList() {
-        GetBoardListResponseDto response = boardService.getLatestBoardList();
+    public ResponseEntity<ResponseDto> getLatestBoardList(
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        GetBoardPageListResponseDto response = boardService.getLatestBoardList(pageable);
         return ResponseEntity.ok().body(ResponseDto.success(response));
     }
 
