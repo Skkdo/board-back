@@ -1,8 +1,8 @@
-name: CI 
+name: CI/CD
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "master" ]
 
   pull_request:
     branches: [ "master" ]
@@ -39,3 +39,50 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: 'board-back'
+        path: build/libs/board-back-0.0.1-SNAPSHOT.jar
+
+  deploy:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: 'board-back'
+          path: build/libs/
+
+      - name: Create .ssh directory and add EC2 host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{secrets.EC2_HOST}} >> ~/.ssh/known_hosts
+
+      - name: Create private key
+        run: |
+          echo "${{secrets.EC2_SSH_KEY}}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Upload to EC2
+        run: |
+          scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: 'ubuntu'
+          key: ${{secrets.EC2_SSH_KEY}}
+          script: |
+            pgrep java && pgrep java | xargs -r kill -9
+            nohup java -jar /home/ubuntu/board-back.0.0.1-SNAPSHOT.jar
+
+      - name: Remove private Key
+        run: rm -f private_key.pem
