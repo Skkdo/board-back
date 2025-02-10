@@ -1,0 +1,75 @@
+name: CD
+
+on:
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+
+    env:
+      JWT_SECRET_KRY: ${{secrets.JWT_SECRET_KEY}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Permission for Gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'board-back'
+          path: build/libs/board-back-0.0.1-SNAPSHOT.jar
+
+  deploy:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Build
+        uses: actions/download-artifact@v4
+        with:
+          name: 'board-back'
+          path: build/libs/
+
+      - name: Create .ssh directory and add EC2 host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{secrets.EC2_HOST}} >> ~/.ssh/known_hosts
+
+      - name: Create private key
+        run: |
+          echo "${{secrets.EC2_SSH_KEY}}" > private_key.pem
+          chmod 400 private_key.pem
+
+      - name: Upload to EC2
+        run: |
+          scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
+      
+      - name: Restart Application
+        run: |
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} << 'EOF'
+            if pgrep java; then
+            pkill -9 java
+          fi
+          nohup java -jar /home/ubuntu/board-back.0.0.1-SNAPSHOT.jar
+
+      - name: Remove private Key
+        run: rm -f private_key.pem
