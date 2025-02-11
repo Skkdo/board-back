@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.kjh.boardback.dto.object.RecipeStep;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeBoardRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PatchRecipeCommentRequestDto;
 import com.kjh.boardback.dto.request.recipe_board.PostRecipeBoardRequestDto;
@@ -33,6 +34,7 @@ import com.kjh.boardback.repository.recipe_board.RecipeImageRepository;
 import com.kjh.boardback.service.RecipeBoardService;
 import com.kjh.boardback.service.UserService;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -89,6 +91,7 @@ public class RecipeBoardServiceTest {
                 .commentCount(0)
                 .viewCount(0)
                 .writer(user)
+                .imageList(new ArrayList<>())
                 .build();
     }
 
@@ -131,16 +134,13 @@ public class RecipeBoardServiceTest {
     @DisplayName("boardNumber 로 보드 찾기 성공")
     void getBoard() {
         RecipeBoard board = board();
-        List<RecipeImage> imageList = List.of();
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
-        doReturn(imageList).when(imageRepository).findByBoard_BoardNumber(board.getBoardNumber());
 
         GetRecipeBoardResponseDto responseDto = boardService.getBoard(board.getBoardNumber());
 
         assertThat(responseDto.getBoardNumber()).isEqualTo(board.getBoardNumber());
         verify(boardRepository, times(1)).findByBoardNumber(board.getBoardNumber());
-        verify(imageRepository, times(1)).findByBoard_BoardNumber(board.getBoardNumber());
     }
 
     @Test
@@ -221,16 +221,21 @@ public class RecipeBoardServiceTest {
     @DisplayName("보드 작성 성공")
     void postBoard() {
         List<String> list = List.of();
+        List<RecipeStep> steps = List.of();
         PostRecipeBoardRequestDto postBoardRequestDto = PostRecipeBoardRequestDto.builder()
                 .title("test")
                 .content("test")
                 .boardImageList(list)
+                .steps(steps)
                 .build();
+
+        RecipeBoard savedBoard = board();
+        doReturn(savedBoard).when(boardRepository).save(any(RecipeBoard.class));
 
         boardService.postBoard(postBoardRequestDto, user.getEmail());
 
         verify(imageRepository, times(1)).saveAll(List.of());
-        verify(boardRepository, times(1)).save(any(RecipeBoard.class));
+        verify(boardRepository, times(2)).save(any(RecipeBoard.class));
     }
 
     @Test
@@ -238,10 +243,12 @@ public class RecipeBoardServiceTest {
     void patchBoard() {
         RecipeBoard board = board();
         List<String> list = List.of();
+        List<RecipeStep> steps = List.of();
         PatchRecipeBoardRequestDto patchBoardRequestDto = PatchRecipeBoardRequestDto.builder()
                 .title("test")
                 .content("test")
                 .boardImageList(list)
+                .steps(steps)
                 .build();
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());

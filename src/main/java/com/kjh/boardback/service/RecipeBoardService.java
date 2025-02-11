@@ -23,7 +23,6 @@ import com.kjh.boardback.repository.recipe_board.RecipeCommentRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeFavoriteRepository;
 import com.kjh.boardback.repository.recipe_board.RecipeImageRepository;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -58,9 +57,8 @@ public class RecipeBoardService {
     public GetRecipeBoardResponseDto getBoard(Integer boardNumber) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);
-        List<RecipeImage> imageList = imageRepository.findByBoard_BoardNumber(boardNumber);
 
-        return new GetRecipeBoardResponseDto(board, imageList);
+        return new GetRecipeBoardResponseDto(board);
     }
 
     public GetRecipeBoardListResponseDto getLatestBoardList(int type) {
@@ -116,80 +114,16 @@ public class RecipeBoardService {
     public void postBoard(PostRecipeBoardRequestDto dto, String email) {
 
         User user = userService.findByEmailOrElseThrow(email);
+
         RecipeBoard board = RecipeBoard.from(dto, user);
-        boardRepository.save(board);
+        RecipeBoard savedBoard = boardRepository.save(board);
 
-        List<RecipeImage> imageList = new ArrayList<>();
-        postBoardImageList(dto, board, imageList);
+        List<RecipeImage> imageList = RecipeImage.toList(board, dto.getBoardImageList(), dto.getSteps());
         imageRepository.saveAll(imageList);
-    }
 
-    private static void postBoardImageList(PostRecipeBoardRequestDto dto, RecipeBoard board,
-                                           List<RecipeImage> imageList) {
-        List<String> boardImageList = dto.getBoardImageList();
-        for (String image : boardImageList) {
-            RecipeImage imageEntity = RecipeImage.from(board, image, 0);
-            imageList.add(imageEntity);
-        }
-        if (dto.getStep1_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep1_image(), 1));
-        }
-        if (dto.getStep2_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep2_image(), 2));
-        }
-        if (dto.getStep3_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep3_image(), 3));
-        }
-        if (dto.getStep4_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep4_image(), 4));
-        }
-        if (dto.getStep5_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep5_image(), 5));
-        }
-        if (dto.getStep6_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep6_image(), 6));
-        }
-        if (dto.getStep7_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep7_image(), 7));
-        }
-        if (dto.getStep8_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep8_image(), 8));
-        }
+        savedBoard.setImageList(imageList);
+        boardRepository.save(savedBoard);
     }
-
-    private static void patchBoardImageList(PatchRecipeBoardRequestDto dto, RecipeBoard board,
-                                            List<RecipeImage> imageList) {
-        List<String> boardImageList = dto.getBoardImageList();
-        for (String image : boardImageList) {
-            RecipeImage imageEntity = RecipeImage.from(board, image, 0);
-            imageList.add(imageEntity);
-        }
-        if (dto.getStep1_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep1_image(), 1));
-        }
-        if (dto.getStep2_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep2_image(), 2));
-        }
-        if (dto.getStep3_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep3_image(), 3));
-        }
-        if (dto.getStep4_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep4_image(), 4));
-        }
-        if (dto.getStep5_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep5_image(), 5));
-        }
-        if (dto.getStep6_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep6_image(), 6));
-        }
-        if (dto.getStep7_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep7_image(), 7));
-        }
-        if (dto.getStep8_image() != null) {
-            imageList.add(RecipeImage.from(board, dto.getStep8_image(), 8));
-        }
-    }
-
 
     @Transactional
     public void patchBoard(PatchRecipeBoardRequestDto dto, Integer boardNumber, String email) {
@@ -203,13 +137,14 @@ public class RecipeBoardService {
             throw new BusinessException(ResponseCode.NO_PERMISSION);
         }
 
-        board.patch(dto);
-        boardRepository.save(board);
         imageRepository.deleteByBoard_BoardNumber(boardNumber);
 
-        List<RecipeImage> imageEntities = new ArrayList<>();
-        patchBoardImageList(dto, board, imageEntities);
-        imageRepository.saveAll(imageEntities);
+        List<RecipeImage> imageList = RecipeImage.toList(board, dto.getBoardImageList(), dto.getSteps());
+        board.patch(dto);
+        board.setImageList(imageList);
+
+        imageRepository.saveAll(imageList);
+        boardRepository.save(board);
     }
 
     @Transactional
@@ -250,7 +185,8 @@ public class RecipeBoardService {
     }
 
     @Transactional
-    public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchRecipeCommentRequestDto dto) {
+    public void patchComment(Integer boardNumber, Integer commentNumber, String email,
+                             PatchRecipeCommentRequestDto dto) {
 
         userService.findByEmailOrElseThrow(email);
         findByBoardNumber(boardNumber);

@@ -23,14 +23,6 @@ public class RecipeBoardListItem {
     private String writerProfileImage;
     private int type;
     private int cookingTime;
-    private String step1_content;
-    private String step2_content;
-    private String step3_content;
-    private String step4_content;
-    private String step5_content;
-    private String step6_content;
-    private String step7_content;
-    private String step8_content;
 
     public RecipeBoardListItem(RecipeBoard board) {
         this.boardNumber = board.getBoardNumber();
@@ -45,14 +37,6 @@ public class RecipeBoardListItem {
         this.writerProfileImage = board.getWriter().getProfileImage();
         this.cookingTime = board.getCookingTime();
         this.type = board.getType();
-        this.step1_content = board.getStep_1();
-        this.step2_content = board.getStep_2();
-        this.step3_content = board.getStep_3();
-        this.step4_content = board.getStep_4();
-        this.step5_content = board.getStep_5();
-        this.step6_content = board.getStep_6();
-        this.step7_content = board.getStep_7();
-        this.step8_content = board.getStep_8();
     }
 
     public static List<RecipeBoardListItem> getList(List<RecipeBoard> boardList) {
