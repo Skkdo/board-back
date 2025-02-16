@@ -5,6 +5,7 @@ import com.kjh.boardback.domain.board.dto.request.PostCommentRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetCommentListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Comment;
+import com.kjh.boardback.domain.board.repository.BoardRepository;
 import com.kjh.boardback.domain.board.repository.CommentRepository;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
@@ -20,12 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class BoardCommentService {
 
     private final CommentRepository commentRepository;
-    private final BoardService boardService;
+    private final BoardRepository boardRepository;
     private final UserService userService;
 
     public Comment findByCommentNumber(Integer commentNumber) {
         return commentRepository.findByCommentNumber(commentNumber).orElseThrow(
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_COMMENT));
+    }
+
+    public Board findByBoardNumber(Integer boardNumber) {
+        return boardRepository.findByBoardNumber(boardNumber).orElseThrow(
+                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
     public void deleteByBoardNumber(Integer boardNumber) {
@@ -34,7 +40,7 @@ public class BoardCommentService {
 
     public GetCommentListResponseDto getCommentList(Integer boardNumber) {
 
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
         List<Comment> commentList = commentRepository.getCommentList(boardNumber);
 
         return new GetCommentListResponseDto(commentList);
@@ -42,21 +48,21 @@ public class BoardCommentService {
 
     @Transactional
     public void postComment(Integer boardNumber, String email, PostCommentRequestDto dto) {
-        Board board = boardService.findByBoardNumber(boardNumber);
+        Board board = findByBoardNumber(boardNumber);
         User user = userService.findByEmailOrElseThrow(email);
 
         Comment comment = new Comment(board, user, dto);
         commentRepository.save(comment);
 
         board.increaseCommentCount();
-        boardService.save(board);
+        boardRepository.save(board);
     }
 
     @Transactional
     public void patchComment(Integer boardNumber, Integer commentNumber, String email, PatchCommentRequestDto dto) {
 
         userService.findByEmailOrElseThrow(email);
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
 
         Comment comment = findByCommentNumber(commentNumber);
         String commentWriterEmail = comment.getWriter().getEmail();
@@ -72,7 +78,7 @@ public class BoardCommentService {
     @Transactional
     public void deleteComment(Integer boardNumber, String email, Integer commentNumber) {
 
-        Board board = boardService.findByBoardNumber(boardNumber);
+        Board board = findByBoardNumber(boardNumber);
         userService.findByEmailOrElseThrow(email);
         Comment comment = findByCommentNumber(commentNumber);
 
@@ -87,6 +93,6 @@ public class BoardCommentService {
 
         commentRepository.delete(comment);
         board.decreaseCommentCount();
-        boardService.save(board);
+        boardRepository.save(board);
     }
 }

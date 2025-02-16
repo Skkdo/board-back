@@ -40,10 +40,6 @@ public class RecipeBoardService {
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
-    public RecipeBoard save(RecipeBoard recipeBoard) {
-        return boardRepository.save(recipeBoard);
-    }
-
     public GetRecipeBoardResponseDto getBoard(Integer boardNumber) {
 
         RecipeBoard board = findByBoardNumber(boardNumber);

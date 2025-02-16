@@ -40,10 +40,6 @@ public class TradeBoardService {
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
-    public TradeBoard save(TradeBoard board) {
-        return boardRepository.save(board);
-    }
-
     public GetTradeBoardResponseDto getBoard(Integer boardNumber) {
         TradeBoard board = findByBoardNumber(boardNumber);
         List<TradeImage> imageList = imageService.findByBoardNumber(boardNumber);

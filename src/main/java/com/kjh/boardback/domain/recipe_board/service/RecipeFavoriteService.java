@@ -3,9 +3,12 @@ package com.kjh.boardback.domain.recipe_board.service;
 import com.kjh.boardback.domain.recipe_board.dto.response.GetRecipeFavoriteListResponseDto;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeBoard;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeFavorite;
+import com.kjh.boardback.domain.recipe_board.repository.RecipeBoardRepository;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeFavoriteRepository;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.exception.BusinessException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +20,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeFavoriteService {
 
     private final RecipeFavoriteRepository favoriteRepository;
-    private final RecipeBoardService boardService;
+    private final RecipeBoardRepository boardRepository;
     private final UserService userService;
 
     public GetRecipeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
         List<RecipeFavorite> favoriteList = favoriteRepository.getFavoriteListWithUser(boardNumber);
         return new GetRecipeFavoriteListResponseDto(favoriteList);
+    }
+
+    public RecipeBoard findByBoardNumber(Integer boardNumber) {
+        return boardRepository.findByBoardNumber(boardNumber).orElseThrow(
+                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
     public void deleteByBoardNumber(Integer boardNumber) {
@@ -34,7 +42,7 @@ public class RecipeFavoriteService {
     public void putFavorite(String email, Integer boardNumber) {
 
         User user = userService.findByEmailOrElseThrow(email);
-        RecipeBoard board = boardService.findByBoardNumber(boardNumber);
+        RecipeBoard board = findByBoardNumber(boardNumber);
 
         Optional<RecipeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
                 boardNumber, email);
@@ -47,6 +55,6 @@ public class RecipeFavoriteService {
             favoriteRepository.delete(optional.get());
             board.decreaseFavoriteCount();
         }
-        boardService.save(board);
+        boardRepository.save(board);
     }
 }

@@ -19,6 +19,7 @@ import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.global.provider.JwtProvider;
 import com.kjh.boardback.domain.auth.service.AuthService;
 import com.kjh.boardback.domain.user.service.UserService;
+import com.kjh.boardback.global.service.RedisService;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ public class AuthServiceTest {
 
     @Mock
     private JwtProvider jwtProvider;
+
+    @Mock
+    private RedisService redisService;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -151,16 +155,19 @@ public class AuthServiceTest {
                 .email(user.getEmail())
                 .password(password)
                 .build();
-        String jwtToken = "token";
+        String accessToken = "token";
+        String refreshToken = "token";
 
         doReturn(Optional.of(user)).when(userService).findByEmail(dto.getEmail());
-        doReturn(jwtToken).when(jwtProvider).create(dto.getEmail());
+        doReturn(accessToken).when(jwtProvider).createAccessToken(dto.getEmail());
+        doReturn(refreshToken).when(jwtProvider).createRefreshToken(dto.getEmail());
+        doNothing().when(redisService).setRefreshToken(dto.getEmail(),refreshToken);
 
         SignInResponseDto response = authService.signIn(dto);
 
-        assertThat(response.getToken()).isEqualTo(jwtToken);
+        assertThat(response.getAccessToken()).isEqualTo(accessToken);
         verify(userService,times(1)).findByEmail(dto.getEmail());
-        verify(jwtProvider,times(1)).create(dto.getEmail());
+        verify(jwtProvider,times(1)).createAccessToken(dto.getEmail());
     }
 
     @Test
@@ -178,12 +185,12 @@ public class AuthServiceTest {
         assertThat(exception.getMessage()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
-        verify(jwtProvider,never()).create(dto.getEmail());
+        verify(jwtProvider,never()).createAccessToken(dto.getEmail());
     }
 
     @Test
     @DisplayName(value = "로그인 실패 - 패스워드 불일치")
-    void signIn_() {
+    void signIn_MissMatched() {
         SignInRequestDto dto = SignInRequestDto.builder()
                 .password("password2")
                 .build();
@@ -196,6 +203,6 @@ public class AuthServiceTest {
         assertThat(exception.getMessage()).isEqualTo(ResponseCode.SIGN_IN_FAIL.getMessage());
 
         verify(userService,times(1)).findByEmail(dto.getEmail());
-        verify(jwtProvider,never()).create(dto.getEmail());
+        verify(jwtProvider,never()).createAccessToken(dto.getEmail());
     }
 }

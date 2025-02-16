@@ -21,7 +21,7 @@ public class AsyncService {
             return;
         }
 
-        List<Board> boardList = redisService.getBoardTop3Values();
+        List<Board> boardList = redisService.getBoardTop3();
         Board last = boardList.get(boardList.size() - 1);
 
         if (last.getViewCount() <= board.getViewCount()) {
@@ -37,12 +37,12 @@ public class AsyncService {
 
     @Async("taskExecutor")
     public void patchBoardIfTop3(Board board) {
-        List<Board> boardList = redisService.getBoardTop3Values();
+        List<Board> boardList = redisService.getBoardTop3();
         for (int i = 0; i < boardList.size(); i++) {
             Board top3Board = boardList.get(i);
             if (top3Board.getBoardNumber() == board.getBoardNumber()) {
                 boardList.set(i, board);
-                redisService.setBoardTop3Values(boardList);
+                redisService.setBoardTop3(boardList);
                 return;
             }
         }
@@ -50,12 +50,12 @@ public class AsyncService {
 
     @Async("taskExecutor")
     public void deleteBoardIfTop3(Integer boardNumber) {
-        List<Board> boardList = redisService.getBoardTop3Values();
+        List<Board> boardList = redisService.getBoardTop3();
         for (int i = 0; i < boardList.size(); i++) {
             Board top3Board = boardList.get(i);
             if (top3Board.getBoardNumber() == boardNumber) {
                 boardList.remove(i);
-                redisService.setBoardTop3Values(boardList);
+                redisService.setBoardTop3(boardList);
                 return;
             }
         }

@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import com.kjh.boardback.domain.recipe_board.dto.response.GetRecipeFavoriteListResponseDto;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeBoard;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeFavorite;
+import com.kjh.boardback.domain.recipe_board.repository.RecipeBoardRepository;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeFavoriteRepository;
-import com.kjh.boardback.domain.recipe_board.service.RecipeBoardService;
 import com.kjh.boardback.domain.recipe_board.service.RecipeFavoriteService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
@@ -35,7 +35,7 @@ public class RecipeFavoriteServiceTest {
     private RecipeFavoriteRepository favoriteRepository;
 
     @Mock
-    private RecipeBoardService boardService;
+    private RecipeBoardRepository boardRepository;
 
     @Mock
     private UserService userService;
@@ -66,7 +66,7 @@ public class RecipeFavoriteServiceTest {
         RecipeBoard board = board();
         List<RecipeFavorite> favoriteList = List.of();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(favoriteList).when(favoriteRepository).getFavoriteListWithUser(board.getBoardNumber());
 
         GetRecipeFavoriteListResponseDto responseDto = favoriteService.getFavoriteList(board.getBoardNumber());
@@ -79,7 +79,7 @@ public class RecipeFavoriteServiceTest {
     void putFavorite() {
         RecipeBoard board = board();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.empty()).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
@@ -87,7 +87,7 @@ public class RecipeFavoriteServiceTest {
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
         verify(favoriteRepository, times(1)).save(any(RecipeFavorite.class));
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class RecipeFavoriteServiceTest {
         RecipeBoard board = board();
         RecipeFavorite favorite = RecipeFavorite.from(user, board);
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.of(favorite)).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
@@ -104,6 +104,6 @@ public class RecipeFavoriteServiceTest {
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
         verify(favoriteRepository, times(1)).delete(favorite);
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 }

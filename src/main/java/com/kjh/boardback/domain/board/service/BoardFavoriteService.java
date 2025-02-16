@@ -3,9 +3,12 @@ package com.kjh.boardback.domain.board.service;
 import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Favorite;
+import com.kjh.boardback.domain.board.repository.BoardRepository;
 import com.kjh.boardback.domain.board.repository.FavoriteRepository;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.global.service.AsyncService;
 import java.util.List;
 import java.util.Optional;
@@ -18,16 +21,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class BoardFavoriteService {
 
     private final FavoriteRepository favoriteRepository;
-    private final BoardService boardService;
+    private final BoardRepository boardRepository;
     private final UserService userService;
     private final AsyncService asyncService;
 
     public GetFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
 
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
         List<Favorite> favoriteList = favoriteRepository.getFavoriteList(boardNumber);
 
         return new GetFavoriteListResponseDto(favoriteList);
+    }
+
+    public Board findByBoardNumber(Integer boardNumber) {
+        return boardRepository.findByBoardNumber(boardNumber).orElseThrow(
+                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
     public void deleteByBoardNumber(Integer boardNumber) {
@@ -37,7 +45,7 @@ public class BoardFavoriteService {
     @Transactional
     public void putFavorite(String email, Integer boardNumber) {
 
-        Board board = boardService.findByBoardNumber(boardNumber);
+        Board board = findByBoardNumber(boardNumber);
         User user = userService.findByEmailOrElseThrow(email);
 
         Optional<Favorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
@@ -52,7 +60,7 @@ public class BoardFavoriteService {
             favoriteRepository.delete(favorite);
             board.decreaseFavoriteCount();
         }
-        boardService.save(board);
+        boardRepository.save(board);
         asyncService.updateTop3IfNeed(board);
     }
 }

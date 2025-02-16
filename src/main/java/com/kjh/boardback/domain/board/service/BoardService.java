@@ -46,10 +46,6 @@ public class BoardService {
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
-    public Board save(Board board) {
-        return boardRepository.save(board);
-    }
-
     public GetBoardResponseDto getBoard(Integer boardNumber) {
         Board board = boardRepository.getBoardWithWriter(boardNumber).orElseThrow(
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
@@ -80,14 +76,14 @@ public class BoardService {
     }
 
     public GetBoardListResponseDto getTop3BoardList() {
-        List<Board> boardList = redisService.getBoardTop3Values();
+        List<Board> boardList = redisService.getBoardTop3();
 
         if (boardList.size() < 3) {
             Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
             LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
             List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
-            redisService.setBoardTop3Values(top3List);
+            redisService.setBoardTop3(top3List);
 
             return new GetBoardListResponseDto(top3List);
         } else {

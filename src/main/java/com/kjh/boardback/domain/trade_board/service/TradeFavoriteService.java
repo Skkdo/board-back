@@ -3,9 +3,12 @@ package com.kjh.boardback.domain.trade_board.service;
 import com.kjh.boardback.domain.trade_board.dto.response.GetTradeFavoriteListResponseDto;
 import com.kjh.boardback.domain.trade_board.entity.TradeBoard;
 import com.kjh.boardback.domain.trade_board.entity.TradeFavorite;
+import com.kjh.boardback.domain.trade_board.repository.TradeBoardRepository;
 import com.kjh.boardback.domain.trade_board.repository.TradeFavoriteRepository;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
+import com.kjh.boardback.global.common.ResponseCode;
+import com.kjh.boardback.global.exception.BusinessException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +20,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class TradeFavoriteService {
 
     private final TradeFavoriteRepository favoriteRepository;
-    private final TradeBoardService boardService;
+    private final TradeBoardRepository boardRepository;
     private final UserService userService;
 
     public GetTradeFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
         List<TradeFavorite> favoriteList = favoriteRepository.getFavoriteList(boardNumber);
         return new GetTradeFavoriteListResponseDto(favoriteList);
+    }
+
+    public TradeBoard findByBoardNumber(Integer boardNumber) {
+        return boardRepository.findByBoardNumber(boardNumber).orElseThrow(
+                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
     }
 
     public void deleteByBoardNumber(Integer boardNumber) {
@@ -34,7 +42,7 @@ public class TradeFavoriteService {
     public void putFavorite(String email, Integer boardNumber) {
 
         User user = userService.findByEmailOrElseThrow(email);
-        TradeBoard board = boardService.findByBoardNumber(boardNumber);
+        TradeBoard board = findByBoardNumber(boardNumber);
 
         Optional<TradeFavorite> optional = favoriteRepository.findByBoard_BoardNumberAndUser_Email(
                 boardNumber, email);
@@ -48,6 +56,6 @@ public class TradeFavoriteService {
             board.decreaseFavoriteCount();
         }
 
-        boardService.save(board);
+        boardRepository.save(board);
     }
 }

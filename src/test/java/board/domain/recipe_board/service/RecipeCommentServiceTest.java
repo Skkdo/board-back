@@ -12,8 +12,8 @@ import com.kjh.boardback.domain.recipe_board.dto.request.PostRecipeCommentReques
 import com.kjh.boardback.domain.recipe_board.dto.response.GetRecipeCommentListResponseDto;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeBoard;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeComment;
+import com.kjh.boardback.domain.recipe_board.repository.RecipeBoardRepository;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeCommentRepository;
-import com.kjh.boardback.domain.recipe_board.service.RecipeBoardService;
 import com.kjh.boardback.domain.recipe_board.service.RecipeCommentService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
@@ -40,7 +40,7 @@ public class RecipeCommentServiceTest {
     private RecipeCommentRepository commentRepository;
 
     @Mock
-    private RecipeBoardService boardService;
+    private RecipeBoardRepository boardRepository;
 
     @Mock
     private UserService userService;
@@ -92,7 +92,7 @@ public class RecipeCommentServiceTest {
         RecipeBoard board = board();
         List<RecipeComment> commentList = List.of();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(commentList).when(commentRepository).getCommentListWithUser(board.getBoardNumber());
 
         GetRecipeCommentListResponseDto responseDto = commentService.getCommentList(board.getBoardNumber());
@@ -107,14 +107,14 @@ public class RecipeCommentServiceTest {
         int commentCount = board.getCommentCount();
         PostRecipeCommentRequestDto postCommentRequestDto = new PostRecipeCommentRequestDto("test");
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
 
         commentService.postComment(board.getBoardNumber(), user.getEmail(), postCommentRequestDto);
 
         assertThat(board.getCommentCount()).isEqualTo(commentCount + 1);
         verify(commentRepository, times(1)).save(any(RecipeComment.class));
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class RecipeCommentServiceTest {
         RecipeComment comment = comment();
         PatchRecipeCommentRequestDto patchCommentRequestDto = new PatchRecipeCommentRequestDto("test");
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());
 
         commentService.patchComment(board.getBoardNumber(), comment.getCommentNumber(), user.getEmail(),
@@ -140,13 +140,13 @@ public class RecipeCommentServiceTest {
         int commentCount = board.getCommentCount();
         RecipeComment comment = comment();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());
 
         commentService.deleteComment(board.getBoardNumber(), comment.getCommentNumber(), user.getEmail());
 
         assertThat(board.getCommentCount()).isEqualTo(commentCount - 1);
         verify(commentRepository, times(1)).delete(comment);
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 }

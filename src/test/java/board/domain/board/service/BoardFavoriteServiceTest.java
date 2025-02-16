@@ -10,9 +10,9 @@ import static org.mockito.Mockito.verify;
 import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Favorite;
+import com.kjh.boardback.domain.board.repository.BoardRepository;
 import com.kjh.boardback.domain.board.repository.FavoriteRepository;
 import com.kjh.boardback.domain.board.service.BoardFavoriteService;
-import com.kjh.boardback.domain.board.service.BoardService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.service.AsyncService;
@@ -37,7 +37,7 @@ public class BoardFavoriteServiceTest {
     private FavoriteRepository favoriteRepository;
 
     @Mock
-    private BoardService boardService;
+    private BoardRepository boardRepository;
 
     @Mock
     private UserService userService;
@@ -71,7 +71,7 @@ public class BoardFavoriteServiceTest {
         Board board = board();
         List<Favorite> favoriteList = List.of();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(favoriteList).when(favoriteRepository).getFavoriteList(board.getBoardNumber());
 
         GetFavoriteListResponseDto responseDto = favoriteService.getFavoriteList(board.getBoardNumber());
@@ -85,7 +85,7 @@ public class BoardFavoriteServiceTest {
         Board board = board();
 
         doNothing().when(asyncService).updateTop3IfNeed(board);
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.empty()).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
@@ -93,7 +93,7 @@ public class BoardFavoriteServiceTest {
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
         verify(favoriteRepository, times(1)).save(any(Favorite.class));
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class BoardFavoriteServiceTest {
         Favorite favorite = new Favorite(board, user);
 
         doNothing().when(asyncService).updateTop3IfNeed(board);
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.of(favorite)).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
@@ -111,6 +111,6 @@ public class BoardFavoriteServiceTest {
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
         verify(favoriteRepository, times(1)).delete(favorite);
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 }

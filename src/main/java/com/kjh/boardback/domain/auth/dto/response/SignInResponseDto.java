@@ -1,22 +1,18 @@
 package com.kjh.boardback.domain.auth.dto.response;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SignInResponseDto {
-
-    private String token;
-
-    @Value("${jwt.expiration.time}")
-    private int expirationTime;
-
-    public SignInResponseDto(String token) {
-        this.token = token;
-    }
+    private String accessToken;
+    private int accessToken_expirationTime;
+    private String refreshToken;
+    private int refreshToken_expirationTime;
 }

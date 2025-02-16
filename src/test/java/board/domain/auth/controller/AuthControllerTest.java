@@ -143,10 +143,13 @@ public class AuthControllerTest {
     @DisplayName(value = "로그인 성공")
     void signIn() throws Exception {
         String url = commonUrl + "/sign-in";
-        String jwtToken = "token";
+        String accessToken = "token";
+        String refreshToken = "token";
+        int accessToken_expirationTime = 1;
+        int refreshToken_expirationTime = 1;
 
         SignInRequestDto requestDto = validSignInRequestDto();
-        SignInResponseDto signInResponseDto = new SignInResponseDto(jwtToken);
+        SignInResponseDto signInResponseDto = new SignInResponseDto(accessToken,accessToken_expirationTime,refreshToken,refreshToken_expirationTime);
         ResponseDto responseDto = ResponseDto.success(signInResponseDto);
 
         doReturn(signInResponseDto).when(authService).signIn(any(SignInRequestDto.class));
@@ -158,7 +161,7 @@ public class AuthControllerTest {
 
         if (!dataNode.isNull()) {
             SignInResponseDto extractedData = objectMapper.convertValue(dataNode, SignInResponseDto.class);
-            assertThat(extractedData.getToken()).isEqualTo(jwtToken);
+            assertThat(extractedData.getAccessToken()).isEqualTo(accessToken);
         }
     }
 

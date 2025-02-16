@@ -11,14 +11,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
-import com.kjh.boardback.domain.board.dto.request.PatchCommentRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
-import com.kjh.boardback.domain.board.dto.request.PostCommentRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardListResponseDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardPageListResponseDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardResponseDto;
-import com.kjh.boardback.domain.board.dto.response.GetCommentListResponseDto;
-import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.service.BoardCommentService;
 import com.kjh.boardback.domain.board.service.BoardFavoriteService;
 import com.kjh.boardback.domain.board.service.BoardImageService;
@@ -27,16 +23,11 @@ import com.kjh.boardback.domain.search_log.service.SearchLogService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Comment;
-import com.kjh.boardback.domain.board.entity.Favorite;
 import com.kjh.boardback.domain.board.entity.Image;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.global.service.RedisService;
-import com.kjh.boardback.domain.search_log.repository.SearchLogRepository;
 import com.kjh.boardback.domain.board.repository.BoardRepository;
-import com.kjh.boardback.domain.board.repository.CommentRepository;
-import com.kjh.boardback.domain.board.repository.FavoriteRepository;
-import com.kjh.boardback.domain.board.repository.ImageRepository;
 import com.kjh.boardback.global.service.AsyncService;
 import com.kjh.boardback.domain.board.service.BoardService;
 import com.kjh.boardback.domain.user.service.UserService;
@@ -181,7 +172,7 @@ public class BoardServiceTest {
         List<Board> boardList = List.of();
         Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
 
-        doReturn(boardList).when(redisService).getBoardTop3Values();
+        doReturn(boardList).when(redisService).getBoardTop3();
         doReturn(boardList).when(boardRepository).getTop3Within7Days(any(LocalDateTime.class), eq(pageable));
 
         GetBoardListResponseDto responseDto = boardService.getTop3BoardList();

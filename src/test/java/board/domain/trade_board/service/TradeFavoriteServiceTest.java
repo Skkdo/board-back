@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import com.kjh.boardback.domain.trade_board.dto.response.GetTradeFavoriteListResponseDto;
 import com.kjh.boardback.domain.trade_board.entity.TradeBoard;
 import com.kjh.boardback.domain.trade_board.entity.TradeFavorite;
+import com.kjh.boardback.domain.trade_board.repository.TradeBoardRepository;
 import com.kjh.boardback.domain.trade_board.repository.TradeFavoriteRepository;
-import com.kjh.boardback.domain.trade_board.service.TradeBoardService;
 import com.kjh.boardback.domain.trade_board.service.TradeFavoriteService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
@@ -35,7 +35,7 @@ public class TradeFavoriteServiceTest {
     private TradeFavoriteRepository favoriteRepository;
 
     @Mock
-    private TradeBoardService boardService;
+    private TradeBoardRepository boardRepository;
 
     @Mock
     private UserService userService;
@@ -66,7 +66,7 @@ public class TradeFavoriteServiceTest {
         TradeBoard board = board();
         List<TradeFavorite> favoriteList = List.of();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(favoriteList).when(favoriteRepository).getFavoriteList(board.getBoardNumber());
 
         GetTradeFavoriteListResponseDto responseDto = favoriteService.getFavoriteList(board.getBoardNumber());
@@ -79,7 +79,7 @@ public class TradeFavoriteServiceTest {
     void putFavorite() {
         TradeBoard board = board();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.empty()).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
@@ -87,7 +87,7 @@ public class TradeFavoriteServiceTest {
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
         verify(favoriteRepository, times(1)).save(any(TradeFavorite.class));
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class TradeFavoriteServiceTest {
         TradeBoard board = board();
         TradeFavorite favorite = TradeFavorite.from(user, board);
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.of(favorite)).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
@@ -104,6 +104,6 @@ public class TradeFavoriteServiceTest {
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
         verify(favoriteRepository, times(1)).delete(favorite);
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 }

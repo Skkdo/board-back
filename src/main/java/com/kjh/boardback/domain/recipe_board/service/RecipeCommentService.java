@@ -5,6 +5,7 @@ import com.kjh.boardback.domain.recipe_board.dto.request.PostRecipeCommentReques
 import com.kjh.boardback.domain.recipe_board.dto.response.GetRecipeCommentListResponseDto;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeBoard;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeComment;
+import com.kjh.boardback.domain.recipe_board.repository.RecipeBoardRepository;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeCommentRepository;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeCommentService {
 
     private final RecipeCommentRepository commentRepository;
-    private final RecipeBoardService boardService;
+    private final RecipeBoardRepository boardRepository;
     private final UserService userService;
 
     public RecipeComment findByCommentNumber(Integer commentNumber) {
@@ -28,12 +29,17 @@ public class RecipeCommentService {
                 () -> new BusinessException(ResponseCode.NOT_EXISTED_COMMENT));
     }
 
+    public RecipeBoard findByBoardNumber(Integer boardNumber) {
+        return boardRepository.findByBoardNumber(boardNumber).orElseThrow(
+                () -> new BusinessException(ResponseCode.NOT_EXISTED_BOARD));
+    }
+
     public void deleteByBoardNumber(Integer boardNumber) {
         commentRepository.deleteByBoard_BoardNumber(boardNumber);
     }
 
     public GetRecipeCommentListResponseDto getCommentList(Integer boardNumber) {
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
         List<RecipeComment> commentList = commentRepository.getCommentListWithUser(boardNumber);
         return new GetRecipeCommentListResponseDto(commentList);
     }
@@ -41,14 +47,14 @@ public class RecipeCommentService {
     @Transactional
     public void postComment(Integer boardNumber, String email, PostRecipeCommentRequestDto dto) {
 
-        RecipeBoard board = boardService.findByBoardNumber(boardNumber);
+        RecipeBoard board = findByBoardNumber(boardNumber);
         User user = userService.findByEmailOrElseThrow(email);
 
         RecipeComment comment = RecipeComment.from(board, user, dto);
         commentRepository.save(comment);
 
         board.increaseCommentCount();
-        boardService.save(board);
+        boardRepository.save(board);
     }
 
     @Transactional
@@ -56,7 +62,7 @@ public class RecipeCommentService {
                              PatchRecipeCommentRequestDto dto) {
 
         userService.findByEmailOrElseThrow(email);
-        boardService.findByBoardNumber(boardNumber);
+        findByBoardNumber(boardNumber);
         RecipeComment comment = findByCommentNumber(commentNumber);
 
         String commentWriterEmail = comment.getWriter().getEmail();
@@ -73,7 +79,7 @@ public class RecipeCommentService {
     public void deleteComment(Integer boardNumber, Integer commentNumber, String email) {
 
         userService.findByEmailOrElseThrow(email);
-        RecipeBoard board = boardService.findByBoardNumber(boardNumber);
+        RecipeBoard board = findByBoardNumber(boardNumber);
         RecipeComment comment = findByCommentNumber(commentNumber);
 
         String boardWriterEmail = board.getWriter().getEmail();
@@ -88,6 +94,6 @@ public class RecipeCommentService {
 
         commentRepository.delete(comment);
         board.decreaseCommentCount();
-        boardService.save(board);
+        boardRepository.save(board);
     }
 }

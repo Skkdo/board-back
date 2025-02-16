@@ -12,9 +12,9 @@ import com.kjh.boardback.domain.board.dto.request.PostCommentRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetCommentListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Comment;
+import com.kjh.boardback.domain.board.repository.BoardRepository;
 import com.kjh.boardback.domain.board.repository.CommentRepository;
 import com.kjh.boardback.domain.board.service.BoardCommentService;
-import com.kjh.boardback.domain.board.service.BoardService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
@@ -40,7 +40,7 @@ public class BoardCommentServiceTest {
     private CommentRepository commentRepository;
 
     @Mock
-    private BoardService boardService;
+    private BoardRepository boardRepository;
 
     @Mock
     private UserService userService;
@@ -92,7 +92,7 @@ public class BoardCommentServiceTest {
         Board board = board();
         List<Comment> commentList = List.of();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(commentList).when(commentRepository).getCommentList(board.getBoardNumber());
 
         GetCommentListResponseDto responseDto = commentService.getCommentList(board.getBoardNumber());
@@ -107,14 +107,14 @@ public class BoardCommentServiceTest {
         int commentCount = board.getCommentCount();
         PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto("test");
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
 
         commentService.postComment(board.getBoardNumber(), user.getEmail(), postCommentRequestDto);
 
         assertThat(board.getCommentCount()).isEqualTo(commentCount + 1);
         verify(commentRepository, times(1)).save(any(Comment.class));
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class BoardCommentServiceTest {
         Comment comment = comment();
         PatchCommentRequestDto patchCommentRequestDto = new PatchCommentRequestDto("test");
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());
 
         commentService.patchComment(board.getBoardNumber(), comment.getCommentNumber(), user.getEmail(),
@@ -140,13 +140,13 @@ public class BoardCommentServiceTest {
         int commentCount = board.getCommentCount();
         Comment comment = comment();
 
-        doReturn(board).when(boardService).findByBoardNumber(board.getBoardNumber());
+        doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());
 
         commentService.deleteComment(board.getBoardNumber(), user.getEmail(), comment.getCommentNumber());
 
         assertThat(board.getCommentCount()).isEqualTo(commentCount - 1);
         verify(commentRepository, times(1)).delete(comment);
-        verify(boardService, times(1)).save(board);
+        verify(boardRepository, times(1)).save(board);
     }
 }
