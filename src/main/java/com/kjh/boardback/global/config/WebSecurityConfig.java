@@ -67,7 +67,6 @@ public class WebSecurityConfig {
 
         return source;
     }
-
 }
 
 class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -76,16 +75,13 @@ class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
-        ResponseDto responseDto = ResponseDto.fail(ResponseCode.AUTHORIZATION_FAIL);
-
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(responseDto);
 
+        ResponseDto responseDto = ResponseDto.fail(ResponseCode.AUTHORIZATION_FAIL);
+        String jsonResponse = objectMapper.writeValueAsString(responseDto);
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonResponse);
-
     }
-
 }

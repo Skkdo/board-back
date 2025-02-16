@@ -1,0 +1,113 @@
+name: CD
+
+on:
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+
+    env:
+      ACCESS_TOKEN_SECRET_KEY: ${{secrets.ACCESS_TOKEN_SECRET_KEY}}
+      REFRESH_TOKEN_SECRET_KEY: ${{secrets.REFRESH_TOKEN_SECRET_KEY}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Permission for Gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'board-back'
+          path: build/libs/board-back-0.0.1-SNAPSHOT.jar
+
+  deploy:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Build
+        uses: actions/download-artifact@v4
+        with:
+          name: 'board-back'
+          path: build/libs/
+
+      - name: Create .ssh directory and add EC2 host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{secrets.EC2_HOST}} >> ~/.ssh/known_hosts
+
+      - name: Create private key
+        run: |
+          echo "${{secrets.EC2_SSH_KEY}}" > private_key.pem
+          chmod 400 private_key.pem
+
+      - name: Create App directory on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/"
+
+      - name: Create Log directory on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{ secrets.EC2_HOST }} "mkdir -p /home/ubuntu/log/"
+
+      - name: Create Log File on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{ secrets.EC2_HOST }} "[ -f /home/ubuntu/log/board_log.out ] || touch /home/ubuntu/log/board_log.out"
+
+      - name: Create .env file on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} << 'EOF'
+            cat <<EOT > /home/ubuntu/board/.env
+          ACCESS_TOKEN_SECRET_KEY=${{secrets.ACCESS_TOKEN_SECRET_KEY}}
+          REFRESH_TOKEN_SECRET_KEY=${{secrets.REFRESH_TOKEN_SECRET_KEY}}
+  
+          DB_URL=${{secrets.DB_URL}}
+          DB_USERNAME=${{secrets.DB_USERNAME}}
+          DB_PASSWORD=${{secrets.DB_PASSWORD}}
+  
+          REDIS_URL=${{secrets.REDIS_URL}}
+          REDIS_PORT=${{secrets.REDIS_PORT}}
+  
+          IAM_ACCESS_KEY=${{secrets.IAM_ACCESS_KEY}}
+          IAM_SECRET_KEY=${{secrets.IAM_SECRET_KEY}}
+          S3_BUCKET_NAME=${{secrets.S3_BUCKET_NAME}}
+          S3_REGION=${{secrets.S3_REGION}}
+          S3_URI=${{secrets.S3_URI}}
+          EOT 
+            EOF
+
+      - name: Upload to EC2
+        run: |
+          scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ubuntu
+          key: ${{secrets.EC2_SSH_KEY}}
+          script: |
+            pgrep java && pgrep java | xargs -r kill -9
+            export $(grep -v '^#' /home/ubuntu/board/.env | xargs)
+            nohup java -jar /home/ubuntu/board/board-back-0.0.1-SNAPSHOT.jar > /home/ubuntu/log/board_log.out 2>&1 &
+
+      - name: Remove private Key
+        run: rm -f private_key.pem
