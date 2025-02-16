@@ -75,7 +75,7 @@ jobs:
 
       - name: Create directory on EC2
         run: |
-          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/ && chmod 700 /home/ubuntu/board/"
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/ && chmod 755 /home/ubuntu/board/"
 
       - name: Upload to EC2
         run: |
