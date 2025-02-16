@@ -87,7 +87,7 @@ jobs:
             if pgrep java; then
             pkill -9 java
           fi
-          nohup java -jar /home/ubuntu/board/board-back.0.0.1-SNAPSHOT.jar &
+          nohup java -jar /home/ubuntu/board/board-back-0.0.1-SNAPSHOT.jar &
           EOF
 
       - name: Remove private Key
