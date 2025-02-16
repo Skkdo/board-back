@@ -11,19 +11,6 @@ jobs:
       ACCESS_TOKEN_SECRET_KEY: ${{secrets.ACCESS_TOKEN_SECRET_KEY}}
       REFRESH_TOKEN_SECRET_KEY: ${{secrets.REFRESH_TOKEN_SECRET_KEY}}
 
-      DB_URL: ${{secrets.DB_URL}}
-      DB_USERNAME: ${{secrets.DB_USERNAME}}
-      DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-
-      REDIS_URL: ${{secrets.REDIS_URL}}
-      REDIS_PORT: ${{secrets.REDIS_PORT}}
-
-      IAM_ACCESS_KEY: ${{secrets.IAM_ACCESS_KEY}}
-      IAM_SECRET_KEY: ${{secrets.IAM_SECRET_KEY}}
-      S3_BUCKET_NAME: ${{secrets.S3_BUCKET_NAME}}
-      S3_REGION: ${{secrets.S3_REGION}}
-      S3_URI: ${{secrets.S3_URI}}
-
     runs-on: ubuntu-latest
 
     steps:
@@ -77,6 +64,28 @@ jobs:
         run: |
           ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/ && chmod 755 /home/ubuntu/board/"
 
+      - name: Create .env file on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} << 'EOF'
+            cat <<EOT > /home/ubuntu/board/.env
+          ACCESS_TOKEN_SECRET_KEY=${{secrets.ACCESS_TOKEN_SECRET_KEY}}
+          REFRESH_TOKEN_SECRET_KEY=${{secrets.REFRESH_TOKEN_SECRET_KEY}}
+  
+          DB_URL=${{secrets.DB_URL}}
+          DB_USERNAME=${{secrets.DB_USERNAME}}
+          DB_PASSWORD=${{secrets.DB_PASSWORD}}
+  
+          REDIS_URL=${{secrets.REDIS_URL}}
+          REDIS_PORT=${{secrets.REDIS_PORT}}
+  
+          IAM_ACCESS_KEY=${{secrets.IAM_ACCESS_KEY}}
+          IAM_SECRET_KEY=${{secrets.IAM_SECRET_KEY}}
+          S3_BUCKET_NAME=${{secrets.S3_BUCKET_NAME}}
+          S3_REGION=${{secrets.S3_REGION}}
+          S3_URI=${{secrets.S3_URI}}
+          EOT 
+            EOF
+
       - name: Upload to EC2
         run: |
           scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
@@ -85,9 +94,10 @@ jobs:
         run: |
           ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} << 'EOF'
             if pgrep java; then
-            pkill -9 java
-          fi
-          nohup java -jar /home/ubuntu/board/board-back-0.0.1-SNAPSHOT.jar &
+              pkill -9 java
+            fi
+            export $(cat /home/ubuntu/board/.env | xargs)
+            nohup java -jar /home/ubuntu/board/board-back-0.0.1-SNAPSHOT.jar &
           EOF
 
       - name: Remove private Key
