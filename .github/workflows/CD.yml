@@ -75,11 +75,11 @@ jobs:
 
       - name: Create directory on EC2
         run: |
-          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/"
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/ && chmod 700 /home/ubuntu/board/"
 
       - name: Upload to EC2
         run: |
-          scp -v -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
+          scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
 
       - name: Restart Application
         run: |
