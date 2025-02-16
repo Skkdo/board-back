@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
@@ -40,11 +41,10 @@ public class FileService {
                 .key(s3Path + filename)
                 .contentType(contentType)
                 .contentLength(file.getSize())
-                .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 
         try (InputStream fileInputStream = file.getInputStream()) {
-            s3Client.putObject(request, (Path) fileInputStream);
+            s3Client.putObject(request, RequestBody.fromInputStream(fileInputStream, file.getSize()));
         } catch (IOException e) {
             throw new BusinessException(ResponseCode.DATABASE_ERROR);
         }
