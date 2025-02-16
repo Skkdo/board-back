@@ -60,9 +60,17 @@ jobs:
           echo "${{secrets.EC2_SSH_KEY}}" > private_key.pem
           chmod 400 private_key.pem
 
-      - name: Create directory on EC2
+      - name: Create App directory on EC2
         run: |
-          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/ && chmod 755 /home/ubuntu/board/"
+          ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} "mkdir -p /home/ubuntu/board/"
+
+      - name: Create Log directory on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{ secrets.EC2_HOST }} "mkdir -p /home/ubuntu/log/"
+
+      - name: Create Log File on EC2
+        run: |
+          ssh -i private_key.pem ubuntu@${{ secrets.EC2_HOST }} "[ -f /home/ubuntu/log/board_log.out ] || touch /home/ubuntu/log/board_log.out"
 
       - name: Create .env file on EC2
         run: |
