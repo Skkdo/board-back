@@ -8,7 +8,9 @@ jobs:
   build:
 
     env:
-      JWT_SECRET_KRY: ${{secrets.JWT_SECRET_KEY}}
+      ACCESS_TOKEN_SECRET_KEY: ${{secrets.ACCESS_TOKEN_SECRET_KEY}}
+      REFRESH_TOKEN_SECRET_KEY: ${{secrets.REFRESH_TOKEN_SECRET_KEY}}
+
 
     runs-on: ubuntu-latest
 
@@ -62,7 +64,7 @@ jobs:
       - name: Upload to EC2
         run: |
           scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
-      
+
       - name: Restart Application
         run: |
           ssh -i private_key.pem ubuntu@${{secrets.EC2_HOST}} << 'EOF'
