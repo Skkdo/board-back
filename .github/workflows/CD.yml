@@ -8,7 +8,8 @@ jobs:
   build:
 
     env:
-      JWT_SECRET_KRY: ${{secrets.JWT_SECRET_KEY}}
+      ACCESS_TOKEN_SECRET_KEY: ${{secrets.ACCESS_TOKEN_SECRET_KEY}}
+      REFRESH_TOKEN_SECRET_KEY: ${{secrets.REFRESH_TOKEN_SECRET_KEY}}
 
     runs-on: ubuntu-latest
 
