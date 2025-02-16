@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload to EC2
         run: |
-          scp -v -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
+          scp -i private_key.pem build/libs/board-back-0.0.1-SNAPSHOT.jar ubuntu@${{secrets.EC2_HOST}}:/home/ubuntu/board/
 
       - name: Restart Application
         run: |
@@ -87,7 +87,8 @@ jobs:
             if pgrep java; then
             pkill -9 java
           fi
-          nohup java -jar /home/ubuntu/board/board-back.0.0.1-SNAPSHOT.jar
+          nohup java -jar /home/ubuntu/board/board-back.0.0.1-SNAPSHOT.jar &
+          EOF
 
       - name: Remove private Key
         run: rm -f private_key.pem
