@@ -34,7 +34,6 @@ public class JwtProvider {
 
     private final String ACCESS_HEADER = "AccessToken";
     private final String REFRESH_HEADER = "RefreshToken";
-    private final String BEARER = "Bearer ";
 
     public String createAccessToken(String email) {
 
@@ -42,7 +41,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS256)
-                .setSubject(email).setIssuedAt(new Date())
+                .setSubject(email).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + accessToken_expirationTime))
                 .compact();
     }
@@ -53,7 +52,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS256)
-                .setSubject(email).setIssuedAt(new Date())
+                .setSubject(email).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + refreshToken_expirationTime))
                 .compact();
     }
@@ -100,18 +99,8 @@ public class JwtProvider {
     }
 
     private String getToken(HttpServletRequest request, String headerName) {
-        String header = request.getHeader(headerName);
-
-        boolean hasText = StringUtils.hasText(header);
-        if (!hasText) {
-            return null;
-        }
-
-        boolean isBearer = header.startsWith(BEARER);
-        if (!isBearer) {
-            return null;
-        }
-
-        return header.substring(7);
+        String value = request.getHeader(headerName);
+        boolean hasText = StringUtils.hasText(value);
+        return hasText ? value : null;
     }
 }
