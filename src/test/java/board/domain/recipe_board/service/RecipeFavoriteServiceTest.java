@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import com.kjh.boardback.domain.recipe_board.dto.response.GetRecipeFavoriteListResponseDto;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeBoard;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeFavorite;
+import com.kjh.boardback.domain.recipe_board.entity.RecipeFavoritePk;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeBoardRepository;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeFavoriteRepository;
 import com.kjh.boardback.domain.recipe_board.service.RecipeFavoriteService;
@@ -94,7 +95,8 @@ public class RecipeFavoriteServiceTest {
     @DisplayName("좋아요 취소 성공")
     void deleteFavorite() {
         RecipeBoard board = board();
-        RecipeFavorite favorite = RecipeFavorite.from(user, board);
+        RecipeFavoritePk favoritePk = new RecipeFavoritePk(user.getEmail(), board.getBoardNumber());
+        RecipeFavorite favorite = new RecipeFavorite(favoritePk, user, board);
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
