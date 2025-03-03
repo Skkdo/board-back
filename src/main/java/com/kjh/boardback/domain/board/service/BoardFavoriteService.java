@@ -1,5 +1,6 @@
 package com.kjh.boardback.domain.board.service;
 
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Favorite;
@@ -63,6 +64,8 @@ public class BoardFavoriteService {
             board.decreaseFavoriteCount();
         }
         boardRepository.save(board);
-        asyncService.updateTop3IfNeed(board);
+
+        BoardDto boardDto = BoardDto.from(board);
+        asyncService.updateTop3IfNeed(boardDto);
     }
 }

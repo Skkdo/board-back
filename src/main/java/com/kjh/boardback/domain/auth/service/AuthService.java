@@ -82,7 +82,12 @@ public class AuthService {
             throw new BusinessException(ResponseCode.REFRESH_TOKEN_MISSING);
         }
 
-        String email = redisService.getRefreshTokenByEmail(refreshToken);
+        String email = jwtProvider.validateRefreshToken(refreshToken);
+        String savedRefreshToken = redisService.getRefreshTokenByEmail(email);
+
+        if(!refreshToken.equals(savedRefreshToken)) {
+            throw new BusinessException(ResponseCode.REFRESH_TOKEN_EXPIRED);
+        }
 
         String newAccessToken = jwtProvider.createAccessToken(email);
         String newRefreshToken = jwtProvider.createRefreshToken(email);

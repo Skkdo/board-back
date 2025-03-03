@@ -1,6 +1,6 @@
 package com.kjh.boardback.global.service;
 
-import com.kjh.boardback.domain.board.entity.Board;
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -15,49 +15,65 @@ public class AsyncService {
     private final RedisService redisService;
 
     @Async("taskExecutor")
-    public void updateTop3IfNeed(Board board) {
+    public void updateTop3IfNeed(BoardDto boardDto) {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        if (board.getCreatedAt().isBefore(sevenDaysAgo)) {
+        if (boardDto.getCreatedAt().isBefore(sevenDaysAgo)) {
             return;
         }
 
-        List<Board> boardList = redisService.getBoardTop3();
-        Board last = boardList.get(boardList.size() - 1);
+        List<BoardDto> boardDtoList = redisService.getBoardTop3();
+        int boardNumber = boardDto.getBoardNumber();
 
-        if (last.getViewCount() <= board.getViewCount()) {
-            boardList.add(board);
-
-            boardList.sort(Comparator.comparingInt(
-                    (Board b) -> -b.getViewCount()
-            ).thenComparingInt(
-                    (Board b) -> -b.getFavoriteCount()
-            ));
+        int index = search(boardDtoList, boardNumber);
+        if (index < 0) {
+            boardDtoList.add(boardDto);
+            sort(boardDtoList);
+            boardDtoList.remove(boardDtoList.size() - 1);
+        }else {
+            boardDtoList.set(index,boardDto);
+            sort(boardDtoList);
         }
+        redisService.setBoardTop3(boardDtoList);
+    }
+
+    private static void sort(List<BoardDto> boardDtoList) {
+        boardDtoList.sort(Comparator.comparingInt(
+                (BoardDto b) -> -b.getViewCount()
+        ).thenComparingInt(
+                (BoardDto b) -> -b.getFavoriteCount()
+        ));
     }
 
     @Async("taskExecutor")
-    public void patchBoardIfTop3(Board board) {
-        List<Board> boardList = redisService.getBoardTop3();
-        for (int i = 0; i < boardList.size(); i++) {
-            Board top3Board = boardList.get(i);
-            if (top3Board.getBoardNumber() == board.getBoardNumber()) {
-                boardList.set(i, board);
-                redisService.setBoardTop3(boardList);
-                return;
-            }
-        }
+    public void patchBoardIfTop3(BoardDto boardDto) {
+        List<BoardDto> boardDtoList = redisService.getBoardTop3();
+        int boardNumber = boardDto.getBoardNumber();
+        
+        int index = search(boardDtoList, boardNumber);
+        if(index < 0) return;
+
+        boardDtoList.set(index,boardDto);
+        redisService.setBoardTop3(boardDtoList);
     }
 
     @Async("taskExecutor")
     public void deleteBoardIfTop3(Integer boardNumber) {
-        List<Board> boardList = redisService.getBoardTop3();
-        for (int i = 0; i < boardList.size(); i++) {
-            Board top3Board = boardList.get(i);
+        List<BoardDto> boardDtoList = redisService.getBoardTop3();
+        
+        int index = search(boardDtoList, boardNumber);
+        if(index < 0) return;
+
+        boardDtoList.remove(index);
+        redisService.setBoardTop3(boardDtoList);
+    }
+    
+    private int search(List<BoardDto> boardDtoList, int boardNumber) {
+        for (int i = 0; i < boardDtoList.size(); i++) {
+            BoardDto top3Board = boardDtoList.get(i);
             if (top3Board.getBoardNumber() == boardNumber) {
-                boardList.remove(i);
-                redisService.setBoardTop3(boardList);
-                return;
+                return i;
             }
         }
+        return -1;
     }
 }

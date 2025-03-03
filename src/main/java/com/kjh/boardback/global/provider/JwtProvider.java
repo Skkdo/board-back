@@ -86,8 +86,7 @@ public class JwtProvider {
             exception.printStackTrace();
             return null;
         }
-        String email = claims.getSubject();
-        return redisService.getRefreshTokenByEmail(email);
+        return claims.getSubject();
     }
 
     public String getAccessToken(HttpServletRequest request) {
