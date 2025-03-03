@@ -1,8 +1,10 @@
 package com.kjh.boardback.global.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +27,21 @@ public class RedisService {
     @Value("${refresh.token.expiration.time}")
     private int refreshToken_expirationTime;
 
-    public List<Board> getBoardTop3() {
+    public List<BoardDto> getBoardTop3() {
+        List<BoardDto> boardList;
         Object o = redisTemplate.opsForValue().get(boardKey);
         if (o instanceof List<?> resultList) {
-            return resultList.stream()
-                    .map(board -> objectMapper.convertValue(board, Board.class))
+            boardList = resultList.stream()
+                    .map(dto -> objectMapper.convertValue(dto, BoardDto.class))
                     .toList();
+        } else {
+            boardList = Collections.emptyList();
         }
-        return new ArrayList<>();
+        return new ArrayList<>(boardList);
     }
 
-    public void setBoardTop3(List<Board> boardList) {
-        redisTemplate.opsForValue().set(boardKey, boardList);
+    public void setBoardTop3(List<BoardDto> dtoList) {
+        redisTemplate.opsForValue().set(boardKey, dtoList);
     }
 
     public String getRefreshTokenByEmail(String email) {
@@ -44,6 +49,7 @@ public class RedisService {
     }
 
     public void setRefreshToken(String email, String refreshToken) {
-        redisStringTemplate.opsForValue().set(refreshTokenKey + email, refreshToken, refreshToken_expirationTime, TimeUnit.SECONDS);
+        redisStringTemplate.opsForValue()
+                .set(refreshTokenKey + email, refreshToken, refreshToken_expirationTime, TimeUnit.MILLISECONDS);
     }
 }

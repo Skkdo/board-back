@@ -1,5 +1,6 @@
 package com.kjh.boardback.domain.board.service;
 
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardListResponseDto;
@@ -56,7 +57,7 @@ public class BoardService {
     public GetBoardListResponseDto getUserBoardList(String email) {
         User user = userService.findByEmailOrElseThrow(email);
         List<Board> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
-        return new GetBoardListResponseDto(boardList, user);
+        return GetBoardListResponseDto.from(boardList, user);
     }
 
     public GetBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
@@ -72,22 +73,24 @@ public class BoardService {
             searchLogService.save(searchLog);
         }
 
-        return new GetBoardListResponseDto(boardList);
+        return GetBoardListResponseDto.from(boardList);
     }
 
     public GetBoardListResponseDto getTop3BoardList() {
-        List<Board> boardList = redisService.getBoardTop3();
+        List<BoardDto> boardList = redisService.getBoardTop3();
 
         if (boardList.size() < 3) {
             Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
             LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
             List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
-            redisService.setBoardTop3(top3List);
+            List<BoardDto> dtoList = BoardDto.getList(top3List);
+            redisService.setBoardTop3(dtoList);
 
-            return new GetBoardListResponseDto(top3List);
+            return GetBoardListResponseDto.from(top3List);
         } else {
-            return new GetBoardListResponseDto(boardList);
+
+            return GetBoardListResponseDto.fromDto(boardList);
         }
     }
 
@@ -100,7 +103,9 @@ public class BoardService {
     public void increaseViewCount(Integer boardNumber) {
         Board board = findByBoardNumber(boardNumber);
         board.increaseViewCount();
-        asyncService.updateTop3IfNeed(board);
+
+        BoardDto dto = BoardDto.from(board);
+        asyncService.updateTop3IfNeed(dto);
 
         boardRepository.save(board);
     }
@@ -145,7 +150,9 @@ public class BoardService {
             imageEntities.add(imageEntity);
         }
         imageService.saveAll(imageEntities);
-        asyncService.patchBoardIfTop3(board);
+
+        BoardDto boardDto = BoardDto.from(board);
+        asyncService.patchBoardIfTop3(boardDto);
     }
 
     @Transactional
