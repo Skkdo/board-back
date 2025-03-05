@@ -1,6 +1,5 @@
 package com.kjh.boardback.domain.board.service;
 
-import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Favorite;
@@ -11,7 +10,6 @@ import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
-import com.kjh.boardback.global.service.AsyncService;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ public class BoardFavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final BoardRepository boardRepository;
     private final UserService userService;
-    private final AsyncService asyncService;
 
     public GetFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
 
@@ -64,8 +61,5 @@ public class BoardFavoriteService {
             board.decreaseFavoriteCount();
         }
         boardRepository.save(board);
-
-        BoardDto boardDto = BoardDto.from(board);
-        asyncService.updateTop3IfNeed(boardDto);
     }
 }
