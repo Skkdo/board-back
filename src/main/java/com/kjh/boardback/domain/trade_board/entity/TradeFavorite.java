@@ -9,13 +9,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TradeFavorite {
@@ -31,11 +29,4 @@ public class TradeFavorite {
     @MapsId("boardNumber")
     @JoinColumn(name = "board_number", nullable = false)
     private TradeBoard board;
-
-    public static TradeFavorite from(User user, TradeBoard board) {
-        return TradeFavorite.builder()
-                .user(user)
-                .board(board)
-                .build();
-    }
 }

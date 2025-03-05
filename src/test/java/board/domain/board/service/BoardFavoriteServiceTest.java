@@ -7,9 +7,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Favorite;
+import com.kjh.boardback.domain.board.entity.FavoritePk;
 import com.kjh.boardback.domain.board.repository.BoardRepository;
 import com.kjh.boardback.domain.board.repository.FavoriteRepository;
 import com.kjh.boardback.domain.board.service.BoardFavoriteService;
@@ -84,7 +86,7 @@ public class BoardFavoriteServiceTest {
     void putFavorite() {
         Board board = board();
 
-        doNothing().when(asyncService).updateTop3IfNeed(board);
+        doNothing().when(asyncService).updateTop3IfNeed(any(BoardDto.class));
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.empty()).when(favoriteRepository)
@@ -100,9 +102,10 @@ public class BoardFavoriteServiceTest {
     @DisplayName("좋아요 취소 성공")
     void deleteFavorite() {
         Board board = board();
-        Favorite favorite = new Favorite(board, user);
+        FavoritePk favoritePk = new FavoritePk(user.getEmail(), board.getBoardNumber());
+        Favorite favorite = new Favorite(favoritePk, user, board);
 
-        doNothing().when(asyncService).updateTop3IfNeed(board);
+        doNothing().when(asyncService).updateTop3IfNeed(any(BoardDto.class));
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
         doReturn(Optional.of(favorite)).when(favoriteRepository)

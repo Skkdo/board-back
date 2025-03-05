@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardListResponseDto;
@@ -201,7 +202,7 @@ public class BoardServiceTest {
         Board board = board();
         int viewCount = board.getViewCount();
 
-        doNothing().when(asyncService).updateTop3IfNeed(board);
+        doNothing().when(asyncService).updateTop3IfNeed(any(BoardDto.class));
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.increaseViewCount(board.getBoardNumber());
@@ -238,7 +239,7 @@ public class BoardServiceTest {
                 .boardImageList(list)
                 .build();
 
-        doNothing().when(asyncService).patchBoardIfTop3(board);
+        doNothing().when(asyncService).patchBoardIfTop3(any(BoardDto.class));
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.patchBoard(patchBoardRequestDto, board.getBoardNumber(), user.getEmail());

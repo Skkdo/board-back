@@ -57,11 +57,24 @@ public class BoardListItem {
                 .build();
     }
 
+    public static BoardListItem from(BoardDto dto) {
+        return BoardListItem.builder()
+                .boardNumber(dto.getBoardNumber())
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .boardTitleImage(dto.getTitleImage())
+                .favoriteCount(dto.getFavoriteCount())
+                .commentCount(dto.getCommentCount())
+                .viewCount(dto.getViewCount())
+                .writeDatetime(dto.getCreatedAt())
+                .writerNickname(dto.getNickname())
+                .writerProfileImage(dto.getProfileImage())
+                .build();
+    }
+
     public static List<BoardListItem> getList(List<Board> boardList, User user) {
         return boardList.stream()
-                .map(board -> {
-                    return BoardListItem.from(board, user);
-                })
+                .map(board -> BoardListItem.from(board, user))
                 .collect(Collectors.toList());
     }
 
@@ -73,5 +86,11 @@ public class BoardListItem {
 
     public static Page<BoardListItem> getList(Page<Board> boardList) {
         return boardList.map(BoardListItem::from);
+    }
+
+    public static List<BoardListItem> getListByDto(List<BoardDto> dtoList) {
+        return dtoList.stream()
+                .map(BoardListItem::from)
+                .collect(Collectors.toList());
     }
 }

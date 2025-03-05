@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecipeFavorite {
@@ -31,11 +30,4 @@ public class RecipeFavorite {
     @MapsId("boardNumber")
     @JoinColumn(name = "board_number", nullable = false)
     private RecipeBoard board;
-
-    public static RecipeFavorite from(User user, RecipeBoard board) {
-        return RecipeFavorite.builder()
-                .user(user)
-                .board(board)
-                .build();
-    }
 }

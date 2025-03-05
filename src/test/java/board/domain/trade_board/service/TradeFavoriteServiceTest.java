@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import com.kjh.boardback.domain.trade_board.dto.response.GetTradeFavoriteListResponseDto;
 import com.kjh.boardback.domain.trade_board.entity.TradeBoard;
 import com.kjh.boardback.domain.trade_board.entity.TradeFavorite;
+import com.kjh.boardback.domain.trade_board.entity.TradeFavoritePk;
 import com.kjh.boardback.domain.trade_board.repository.TradeBoardRepository;
 import com.kjh.boardback.domain.trade_board.repository.TradeFavoriteRepository;
 import com.kjh.boardback.domain.trade_board.service.TradeFavoriteService;
@@ -94,7 +95,8 @@ public class TradeFavoriteServiceTest {
     @DisplayName("좋아요 취소 성공")
     void deleteFavorite() {
         TradeBoard board = board();
-        TradeFavorite favorite = TradeFavorite.from(user, board);
+        TradeFavoritePk favoritePk = new TradeFavoritePk(user.getEmail(), board.getBoardNumber());
+        TradeFavorite favorite = new TradeFavorite(favoritePk, user, board);
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
         doReturn(user).when(userService).findByEmailOrElseThrow(user.getEmail());
