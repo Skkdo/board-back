@@ -26,14 +26,8 @@ public class BoardDto {
     private LocalDateTime createdAt;
 
     // Writer
-    private String email;
-    private String password;
     private String nickname;
-    private String telNumber;
-    private String address;
-    private String addressDetail;
     private String profileImage;
-    private boolean agreedPersonal;
 
     public static BoardDto from(Board board) {
         return BoardDto.builder()
@@ -46,14 +40,8 @@ public class BoardDto {
                 .viewCount(board.getViewCount())
                 .createdAt(board.getCreatedAt())
                 // writer
-                .email(board.getWriter().getEmail())
-                .password(board.getWriter().getPassword())
                 .nickname(board.getWriter().getNickname())
-                .telNumber(board.getWriter().getTelNumber())
-                .address(board.getWriter().getAddress())
-                .addressDetail(board.getWriter().getAddressDetail())
                 .profileImage(board.getWriter().getProfileImage())
-                .agreedPersonal(board.getWriter().isAgreedPersonal())
                 .build();
     }
 

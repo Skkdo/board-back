@@ -15,7 +15,6 @@ import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
-import com.kjh.boardback.global.service.AsyncService;
 import com.kjh.boardback.global.service.RedisService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ public class BoardService {
     private final BoardImageService imageService;
     private final UserService userService;
     private final SearchLogService searchLogService;
-    private final AsyncService asyncService;
     private final RedisService redisService;
 
     public Board findByBoardNumber(Integer boardNumber) {
@@ -80,7 +78,7 @@ public class BoardService {
         List<BoardDto> boardList = redisService.getBoardTop3();
 
         if (boardList.size() < 3) {
-            Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+            Pageable pageable = PageRequest.of(0, 3);
             LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
             List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
@@ -103,10 +101,6 @@ public class BoardService {
     public void increaseViewCount(Integer boardNumber) {
         Board board = findByBoardNumber(boardNumber);
         board.increaseViewCount();
-
-        BoardDto dto = BoardDto.from(board);
-        asyncService.updateTop3IfNeed(dto);
-
         boardRepository.save(board);
     }
 
@@ -150,9 +144,7 @@ public class BoardService {
             imageEntities.add(imageEntity);
         }
         imageService.saveAll(imageEntities);
-
-        BoardDto boardDto = BoardDto.from(board);
-        asyncService.patchBoardIfTop3(boardDto);
+        updateCacheIfInclude(boardNumber);
     }
 
     @Transactional
@@ -171,7 +163,21 @@ public class BoardService {
         boardFavoriteService.deleteByBoardNumber(boardNumber);
         boardCommentService.deleteByBoardNumber(boardNumber);
         boardRepository.delete(board);
-        asyncService.deleteBoardIfTop3(boardNumber);
+        updateCacheIfInclude(boardNumber);
+    }
+
+    private void updateCacheIfInclude(Integer boardNumber) {
+        List<BoardDto> boardList = redisService.getBoardTop3();
+        for(BoardDto dto : boardList) {
+            if(dto.getBoardNumber() == boardNumber) {
+                Pageable pageable = PageRequest.of(0, 3);
+                LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+                List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
+                List<BoardDto> dtoList = BoardDto.getList(top3List);
+                redisService.setBoardTop3(dtoList);
+                return;
+            }
+        }
     }
 
 }
