@@ -10,6 +10,7 @@ import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class BoardFavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final BoardRepository boardRepository;
     private final UserService userService;
+    private final EntityManager em;
 
     public GetFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
 
@@ -51,15 +53,19 @@ public class BoardFavoriteService {
                 boardNumber, email);
 
         if (optional.isEmpty()) {
+            board.increaseFavoriteCount();
+            em.flush();
             FavoritePk favoritePk = new FavoritePk(user.getEmail(), board.getBoardNumber());
             Favorite favorite = new Favorite(favoritePk, user, board);
             favoriteRepository.save(favorite);
-            board.increaseFavoriteCount();
+            //board.increaseFavoriteCount();
         } else {
+            board.decreaseFavoriteCount();
+            em.flush();
             Favorite favorite = optional.get();
             favoriteRepository.delete(favorite);
-            board.decreaseFavoriteCount();
+            //board.decreaseFavoriteCount();
         }
-        boardRepository.save(board);
+        //boardRepository.save(board);
     }
 }
