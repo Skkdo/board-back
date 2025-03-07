@@ -1,5 +1,6 @@
 package com.kjh.boardback.domain.board.service;
 
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardListResponseDto;
@@ -14,7 +15,6 @@ import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
-import com.kjh.boardback.global.service.AsyncService;
 import com.kjh.boardback.global.service.RedisService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,7 +38,6 @@ public class BoardService {
     private final BoardImageService imageService;
     private final UserService userService;
     private final SearchLogService searchLogService;
-    private final AsyncService asyncService;
     private final RedisService redisService;
 
     public Board findByBoardNumber(Integer boardNumber) {
@@ -56,7 +55,7 @@ public class BoardService {
     public GetBoardListResponseDto getUserBoardList(String email) {
         User user = userService.findByEmailOrElseThrow(email);
         List<Board> boardList = boardRepository.findByWriter_EmailOrderByCreatedAtDesc(email);
-        return new GetBoardListResponseDto(boardList, user);
+        return GetBoardListResponseDto.from(boardList, user);
     }
 
     public GetBoardListResponseDto getSearchBoardList(String searchWord, String preSearchWord) {
@@ -72,22 +71,24 @@ public class BoardService {
             searchLogService.save(searchLog);
         }
 
-        return new GetBoardListResponseDto(boardList);
+        return GetBoardListResponseDto.from(boardList);
     }
 
     public GetBoardListResponseDto getTop3BoardList() {
-        List<Board> boardList = redisService.getBoardTop3();
+        List<BoardDto> boardList = redisService.getBoardTop3();
 
         if (boardList.size() < 3) {
-            Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+            Pageable pageable = PageRequest.of(0, 3);
             LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
             List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
-            redisService.setBoardTop3(top3List);
+            List<BoardDto> dtoList = BoardDto.getList(top3List);
+            redisService.setBoardTop3(dtoList);
 
-            return new GetBoardListResponseDto(top3List);
+            return GetBoardListResponseDto.from(top3List);
         } else {
-            return new GetBoardListResponseDto(boardList);
+
+            return GetBoardListResponseDto.fromDto(boardList);
         }
     }
 
@@ -100,8 +101,6 @@ public class BoardService {
     public void increaseViewCount(Integer boardNumber) {
         Board board = findByBoardNumber(boardNumber);
         board.increaseViewCount();
-        asyncService.updateTop3IfNeed(board);
-
         boardRepository.save(board);
     }
 
@@ -145,7 +144,7 @@ public class BoardService {
             imageEntities.add(imageEntity);
         }
         imageService.saveAll(imageEntities);
-        asyncService.patchBoardIfTop3(board);
+        updateCacheIfInclude(boardNumber);
     }
 
     @Transactional
@@ -164,7 +163,21 @@ public class BoardService {
         boardFavoriteService.deleteByBoardNumber(boardNumber);
         boardCommentService.deleteByBoardNumber(boardNumber);
         boardRepository.delete(board);
-        asyncService.deleteBoardIfTop3(boardNumber);
+        updateCacheIfInclude(boardNumber);
+    }
+
+    private void updateCacheIfInclude(Integer boardNumber) {
+        List<BoardDto> boardList = redisService.getBoardTop3();
+        for(BoardDto dto : boardList) {
+            if(dto.getBoardNumber() == boardNumber) {
+                Pageable pageable = PageRequest.of(0, 3);
+                LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+                List<Board> top3List = boardRepository.getTop3Within7Days(sevenDaysAgo, pageable);
+                List<BoardDto> dtoList = BoardDto.getList(top3List);
+                redisService.setBoardTop3(dtoList);
+                return;
+            }
+        }
     }
 
 }

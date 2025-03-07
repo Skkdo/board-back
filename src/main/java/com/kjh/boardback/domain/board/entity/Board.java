@@ -2,8 +2,8 @@ package com.kjh.boardback.domain.board.entity;
 
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
-import com.kjh.boardback.global.entity.BaseEntity;
 import com.kjh.boardback.domain.user.entity.User;
+import com.kjh.boardback.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

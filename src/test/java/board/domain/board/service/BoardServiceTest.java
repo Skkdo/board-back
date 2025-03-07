@@ -1,44 +1,42 @@
 package board.domain.board.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
+import com.kjh.boardback.domain.board.dto.object.BoardDto;
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardListResponseDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardPageListResponseDto;
 import com.kjh.boardback.domain.board.dto.response.GetBoardResponseDto;
-import com.kjh.boardback.domain.board.service.BoardCommentService;
-import com.kjh.boardback.domain.board.service.BoardFavoriteService;
-import com.kjh.boardback.domain.board.service.BoardImageService;
-import com.kjh.boardback.domain.search_log.entity.SearchLog;
-import com.kjh.boardback.domain.search_log.service.SearchLogService;
-import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Comment;
 import com.kjh.boardback.domain.board.entity.Image;
+import com.kjh.boardback.domain.board.repository.BoardRepository;
+import com.kjh.boardback.domain.board.service.BoardCommentService;
+import com.kjh.boardback.domain.board.service.BoardFavoriteService;
+import com.kjh.boardback.domain.board.service.BoardImageService;
+import com.kjh.boardback.domain.board.service.BoardService;
+import com.kjh.boardback.domain.search_log.entity.SearchLog;
+import com.kjh.boardback.domain.search_log.service.SearchLogService;
+import com.kjh.boardback.domain.user.entity.User;
+import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
 import com.kjh.boardback.global.service.RedisService;
-import com.kjh.boardback.domain.board.repository.BoardRepository;
-import com.kjh.boardback.global.service.AsyncService;
-import com.kjh.boardback.domain.board.service.BoardService;
-import com.kjh.boardback.domain.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -75,9 +73,6 @@ public class BoardServiceTest {
 
     @Mock
     private RedisService redisService;
-
-    @Mock
-    private AsyncService asyncService;
 
     private final User user = User.builder()
             .email("email@email.com")
@@ -170,7 +165,7 @@ public class BoardServiceTest {
     @DisplayName("주간 Top3 보드 리스트 조회 성공")
     void getTop3BoardList() {
         List<Board> boardList = List.of();
-        Pageable pageable = PageRequest.of(0, 3, Sort.by(Order.desc("viewCount"), Order.desc("favoriteCount")));
+        Pageable pageable = PageRequest.of(0, 3);
 
         doReturn(boardList).when(redisService).getBoardTop3();
         doReturn(boardList).when(boardRepository).getTop3Within7Days(any(LocalDateTime.class), eq(pageable));
@@ -201,7 +196,6 @@ public class BoardServiceTest {
         Board board = board();
         int viewCount = board.getViewCount();
 
-        doNothing().when(asyncService).updateTop3IfNeed(board);
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.increaseViewCount(board.getBoardNumber());
@@ -232,14 +226,15 @@ public class BoardServiceTest {
     void patchBoard() {
         Board board = board();
         List<String> list = List.of();
+        List<BoardDto> dtoList = List.of();
         PatchBoardRequestDto patchBoardRequestDto = PatchBoardRequestDto.builder()
                 .title("test")
                 .content("test")
                 .boardImageList(list)
                 .build();
 
-        doNothing().when(asyncService).patchBoardIfTop3(board);
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
+        doReturn(dtoList).when(redisService).getBoardTop3();
 
         boardService.patchBoard(patchBoardRequestDto, board.getBoardNumber(), user.getEmail());
 
@@ -273,9 +268,10 @@ public class BoardServiceTest {
     @DisplayName("보드 삭제 성공")
     void deleteBoard() {
         Board board = board();
+        List<BoardDto> dtoList = List.of();
 
-        doNothing().when(asyncService).deleteBoardIfTop3(board.getBoardNumber());
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
+        doReturn(dtoList).when(redisService).getBoardTop3();
 
         boardService.deleteBoard(board.getBoardNumber(), user.getEmail());
 
