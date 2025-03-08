@@ -41,6 +41,10 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
     Optional<Board> getBoardWithWriter(@Param("boardNumber") Integer boardNumber);
 
     @Modifying
+    @Query("UPDATE Board b SET b.viewCount = b.viewCount + 1 WHERE b.boardNumber = :boardNumber")
+    void increaseViewCount(@Param("boardNumber") Integer boardNumber);
+
+    @Modifying
     @Query("UPDATE Board b SET b.favoriteCount = b.favoriteCount + 1 WHERE b.boardNumber = :boardNumber")
     void increaseFavoriteCount(@Param("boardNumber") Integer boardNumber);
 

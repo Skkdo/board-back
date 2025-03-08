@@ -194,14 +194,13 @@ public class BoardServiceTest {
     @DisplayName("조회수 증가 성공")
     void increaseViewCount() {
         Board board = board();
-        int viewCount = board.getViewCount();
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
 
         boardService.increaseViewCount(board.getBoardNumber());
 
-        assertThat(board.getViewCount()).isEqualTo(viewCount + 1);
         verify(boardRepository, times(1)).findByBoardNumber(board.getBoardNumber());
+        verify(boardRepository, times(1)).increaseViewCount(board.getBoardNumber());
         verify(boardRepository, times(1)).save(board);
     }
 
