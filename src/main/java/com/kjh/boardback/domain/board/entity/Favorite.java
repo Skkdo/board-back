@@ -8,11 +8,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Favorite {
 
@@ -28,9 +30,4 @@ public class Favorite {
     @MapsId("boardNumber")
     @JoinColumn(name = "board_number", nullable = false)
     private Board board;
-
-    public Favorite(Board board, User user){
-        this.user = user;
-        this.board =board;
-    }
 }

@@ -2,8 +2,8 @@ package com.kjh.boardback.domain.board.entity;
 
 import com.kjh.boardback.domain.board.dto.request.PatchBoardRequestDto;
 import com.kjh.boardback.domain.board.dto.request.PostBoardRequestDto;
-import com.kjh.boardback.global.entity.BaseEntity;
 import com.kjh.boardback.domain.user.entity.User;
+import com.kjh.boardback.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,26 +55,6 @@ public class Board extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_email", nullable = false)
     private User writer;
-
-    public void increaseViewCount() {
-        this.viewCount++;
-    }
-
-    public void increaseCommentCount() {
-        this.commentCount++;
-    }
-
-    public void decreaseCommentCount() {
-        this.commentCount--;
-    }
-
-    public void increaseFavoriteCount() {
-        this.favoriteCount++;
-    }
-
-    public void decreaseFavoriteCount() {
-        this.favoriteCount--;
-    }
 
     public void patchBoard(PatchBoardRequestDto dto) {
         this.title = dto.getTitle();

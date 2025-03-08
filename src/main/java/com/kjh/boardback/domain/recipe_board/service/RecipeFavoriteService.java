@@ -3,6 +3,7 @@ package com.kjh.boardback.domain.recipe_board.service;
 import com.kjh.boardback.domain.recipe_board.dto.response.GetRecipeFavoriteListResponseDto;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeBoard;
 import com.kjh.boardback.domain.recipe_board.entity.RecipeFavorite;
+import com.kjh.boardback.domain.recipe_board.entity.RecipeFavoritePk;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeBoardRepository;
 import com.kjh.boardback.domain.recipe_board.repository.RecipeFavoriteRepository;
 import com.kjh.boardback.domain.user.entity.User;
@@ -48,7 +49,8 @@ public class RecipeFavoriteService {
                 boardNumber, email);
 
         if (optional.isEmpty()) {
-            RecipeFavorite favorite = RecipeFavorite.from(user, board);
+            RecipeFavoritePk recipeFavoritePk = new RecipeFavoritePk(user.getEmail(), board.getBoardNumber());
+            RecipeFavorite favorite = new RecipeFavorite(recipeFavoritePk, user, board);
             favoriteRepository.save(favorite);
             board.increaseFavoriteCount();
         } else {

@@ -3,13 +3,14 @@ package com.kjh.boardback.domain.board.service;
 import com.kjh.boardback.domain.board.dto.response.GetFavoriteListResponseDto;
 import com.kjh.boardback.domain.board.entity.Board;
 import com.kjh.boardback.domain.board.entity.Favorite;
+import com.kjh.boardback.domain.board.entity.FavoritePk;
 import com.kjh.boardback.domain.board.repository.BoardRepository;
 import com.kjh.boardback.domain.board.repository.FavoriteRepository;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
-import com.kjh.boardback.global.service.AsyncService;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class BoardFavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final BoardRepository boardRepository;
     private final UserService userService;
-    private final AsyncService asyncService;
+    private final EntityManager em;
 
     public GetFavoriteListResponseDto getFavoriteList(Integer boardNumber) {
 
@@ -52,15 +53,16 @@ public class BoardFavoriteService {
                 boardNumber, email);
 
         if (optional.isEmpty()) {
-            Favorite favorite = new Favorite(board, user);
+            boardRepository.increaseFavoriteCount(boardNumber);
+            em.flush();
+            FavoritePk favoritePk = new FavoritePk(user.getEmail(), board.getBoardNumber());
+            Favorite favorite = new Favorite(favoritePk, user, board);
             favoriteRepository.save(favorite);
-            board.increaseFavoriteCount();
         } else {
+            boardRepository.decreaseFavoriteCount(boardNumber);
+            em.flush();
             Favorite favorite = optional.get();
             favoriteRepository.delete(favorite);
-            board.decreaseFavoriteCount();
         }
-        boardRepository.save(board);
-        asyncService.updateTop3IfNeed(board);
     }
 }

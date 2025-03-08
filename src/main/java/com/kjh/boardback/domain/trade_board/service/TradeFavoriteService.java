@@ -3,6 +3,7 @@ package com.kjh.boardback.domain.trade_board.service;
 import com.kjh.boardback.domain.trade_board.dto.response.GetTradeFavoriteListResponseDto;
 import com.kjh.boardback.domain.trade_board.entity.TradeBoard;
 import com.kjh.boardback.domain.trade_board.entity.TradeFavorite;
+import com.kjh.boardback.domain.trade_board.entity.TradeFavoritePk;
 import com.kjh.boardback.domain.trade_board.repository.TradeBoardRepository;
 import com.kjh.boardback.domain.trade_board.repository.TradeFavoriteRepository;
 import com.kjh.boardback.domain.user.entity.User;
@@ -48,7 +49,8 @@ public class TradeFavoriteService {
                 boardNumber, email);
 
         if (optional.isEmpty()) {
-            TradeFavorite favorite = TradeFavorite.from(user, board);
+            TradeFavoritePk tradeFavoritePk = new TradeFavoritePk(user.getEmail(), board.getBoardNumber());
+            TradeFavorite favorite = new TradeFavorite(tradeFavoritePk, user, board);
             favoriteRepository.save(favorite);
             board.increaseFavoriteCount();
         } else {
