@@ -100,7 +100,7 @@ public class BoardService {
     @Transactional
     public void increaseViewCount(Integer boardNumber) {
         Board board = findByBoardNumber(boardNumber);
-        board.increaseViewCount();
+        boardRepository.increaseViewCount(boardNumber);
         boardRepository.save(board);
     }
 

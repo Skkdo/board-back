@@ -9,6 +9,7 @@ import com.kjh.boardback.domain.board.repository.FavoriteRepository;
 import com.kjh.boardback.domain.board.service.BoardFavoriteService;
 import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,6 +41,9 @@ public class BoardFavoriteServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private EntityManager em;
 
     private final User user = User.builder()
             .email("email@email.com")
@@ -84,10 +89,12 @@ public class BoardFavoriteServiceTest {
         doReturn(Optional.empty()).when(favoriteRepository)
                 .findByBoard_BoardNumberAndUser_Email(board.getBoardNumber(), user.getEmail());
 
+
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
+        verify(boardRepository, times(1)).increaseFavoriteCount(board.getBoardNumber());
+        verify(em,times(1)).flush();
         verify(favoriteRepository, times(1)).save(any(Favorite.class));
-        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -104,7 +111,8 @@ public class BoardFavoriteServiceTest {
 
         favoriteService.putFavorite(user.getEmail(), board.getBoardNumber());
 
+        verify(boardRepository, times(1)).decreaseFavoriteCount(board.getBoardNumber());
+        verify(em,times(1)).flush();
         verify(favoriteRepository, times(1)).delete(favorite);
-        verify(boardRepository, times(1)).save(board);
     }
 }

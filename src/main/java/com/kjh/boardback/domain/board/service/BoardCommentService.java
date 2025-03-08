@@ -11,6 +11,7 @@ import com.kjh.boardback.domain.user.entity.User;
 import com.kjh.boardback.domain.user.service.UserService;
 import com.kjh.boardback.global.common.ResponseCode;
 import com.kjh.boardback.global.exception.BusinessException;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class BoardCommentService {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
     private final UserService userService;
+    private final EntityManager em;
 
     public Comment findByCommentNumber(Integer commentNumber) {
         return commentRepository.findByCommentNumber(commentNumber).orElseThrow(
@@ -51,11 +53,11 @@ public class BoardCommentService {
         Board board = findByBoardNumber(boardNumber);
         User user = userService.findByEmailOrElseThrow(email);
 
+        boardRepository.increaseCommentCount(boardNumber);
+        em.flush();
+
         Comment comment = new Comment(board, user, dto);
         commentRepository.save(comment);
-
-        board.increaseCommentCount();
-        boardRepository.save(board);
     }
 
     @Transactional
@@ -91,8 +93,8 @@ public class BoardCommentService {
             throw new BusinessException(ResponseCode.NO_PERMISSION);
         }
 
+        boardRepository.decreaseCommentCount(boardNumber);
+        em.flush();
         commentRepository.delete(comment);
-        board.decreaseCommentCount();
-        boardRepository.save(board);
     }
 }

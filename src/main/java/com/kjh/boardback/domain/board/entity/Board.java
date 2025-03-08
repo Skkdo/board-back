@@ -56,26 +56,6 @@ public class Board extends BaseEntity {
     @JoinColumn(name = "writer_email", nullable = false)
     private User writer;
 
-    public void increaseViewCount() {
-        this.viewCount++;
-    }
-
-    public void increaseCommentCount() {
-        this.commentCount++;
-    }
-
-    public void decreaseCommentCount() {
-        this.commentCount--;
-    }
-
-    public void increaseFavoriteCount() {
-        this.favoriteCount++;
-    }
-
-    public void decreaseFavoriteCount() {
-        this.favoriteCount--;
-    }
-
     public void patchBoard(PatchBoardRequestDto dto) {
         this.title = dto.getTitle();
         this.content = dto.getContent();
