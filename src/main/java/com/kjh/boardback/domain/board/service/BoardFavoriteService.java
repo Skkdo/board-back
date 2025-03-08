@@ -53,19 +53,16 @@ public class BoardFavoriteService {
                 boardNumber, email);
 
         if (optional.isEmpty()) {
-            board.increaseFavoriteCount();
+            boardRepository.increaseFavoriteCount(boardNumber);
             em.flush();
             FavoritePk favoritePk = new FavoritePk(user.getEmail(), board.getBoardNumber());
             Favorite favorite = new Favorite(favoritePk, user, board);
             favoriteRepository.save(favorite);
-            //board.increaseFavoriteCount();
         } else {
-            board.decreaseFavoriteCount();
+            boardRepository.decreaseFavoriteCount(boardNumber);
             em.flush();
             Favorite favorite = optional.get();
             favoriteRepository.delete(favorite);
-            //board.decreaseFavoriteCount();
         }
-        //boardRepository.save(board);
     }
 }

@@ -1,8 +1,10 @@
 package board.domain.board.service;
 
+import jakarta.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +46,9 @@ public class BoardCommentServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private EntityManager em;
 
     private final User user = User.builder()
             .email("email@email.com")
@@ -104,7 +109,6 @@ public class BoardCommentServiceTest {
     @DisplayName("댓글 작성 성공")
     void postComment() {
         Board board = board();
-        int commentCount = board.getCommentCount();
         PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto("test");
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
@@ -112,9 +116,9 @@ public class BoardCommentServiceTest {
 
         commentService.postComment(board.getBoardNumber(), user.getEmail(), postCommentRequestDto);
 
-        assertThat(board.getCommentCount()).isEqualTo(commentCount + 1);
+        verify(boardRepository, times(1)).increaseCommentCount(board.getBoardNumber());
+        verify(em, times(1)).flush();
         verify(commentRepository, times(1)).save(any(Comment.class));
-        verify(boardRepository, times(1)).save(board);
     }
 
     @Test
@@ -137,16 +141,15 @@ public class BoardCommentServiceTest {
     @DisplayName("댓글 삭제 성공")
     void deleteComment() {
         Board board = board();
-        int commentCount = board.getCommentCount();
         Comment comment = comment();
 
         doReturn(Optional.of(board)).when(boardRepository).findByBoardNumber(board.getBoardNumber());
-        doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());
+        doReturn(Optional.of(comment)).when(commentRepository).findByCommentNumber(comment.getCommentNumber());;
 
         commentService.deleteComment(board.getBoardNumber(), user.getEmail(), comment.getCommentNumber());
 
-        assertThat(board.getCommentCount()).isEqualTo(commentCount - 1);
+        verify(boardRepository, times(1)).decreaseCommentCount(board.getBoardNumber());
+        verify(em, times(1)).flush();
         verify(commentRepository, times(1)).delete(comment);
-        verify(boardRepository, times(1)).save(board);
     }
 }
